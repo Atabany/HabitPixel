@@ -47,18 +47,10 @@ struct NewHabitView: View {
         _selectedColor = State(initialValue: editingHabit?.color ?? .red)
     }
     
-    // Add predefined categories
-    private let categories = [
-        ("Fitness", "figure.walk"),
-        ("Health", "heart"),
-        ("Learning", "book"),
-        ("Mindfulness", "brain.head.profile"),
-        ("Productivity", "chart.bar"),
-        ("Finance", "dollarsign.circle"),
-        ("Social", "person.2"),
-        ("Art", "paintbrush"),
-        ("Other", "circle.grid.cross")
-    ]
+    // Update categories property
+    private var categories: [(String, String)] {
+        Category.categories.dropFirst().map { ($0.name, $0.icon) }
+    }
     
     // Add quick access icons and colors
     private let quickIcons = [

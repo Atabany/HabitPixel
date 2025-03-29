@@ -49,7 +49,7 @@ enum Interval: String, CaseIterable, Identifiable {
             return (weekStart, weekEnd)
             
         case .monthly:
-            let components = calendar.dateComponents([.year, .month], from: startOfDay)
+            var components = calendar.dateComponents([.year, .month], from: startOfDay)
             let monthStart = calendar.date(from: components)!
             let monthEnd = calendar.date(byAdding: .month, value: 1, to: monthStart)!
             return (monthStart, monthEnd)

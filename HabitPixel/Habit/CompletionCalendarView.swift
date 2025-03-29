@@ -3,85 +3,123 @@ import SwiftData
 
 struct CompletionCalendarView: View {
     @Environment(\.dismiss) var dismiss
-    @Environment(\.modelContext) private var modelContext
     let habit: HabitEntity
     
     @State private var selectedDate = Date()
-    let calendar = Calendar.current
+    @State private var completedDates: Set<Date>
+    
+    @Environment(\.modelContext) private var modelContext
+    
+    private let calendar = Calendar.current
     private let daysInWeek = 7
     private let weekRows = 6
+    private let weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+    
+    init(habit: HabitEntity) {
+        self.habit = habit
+        let dates = habit.entries.map { Calendar.current.startOfDay(for: $0.timestamp) }
+        _completedDates = State(initialValue: Set(dates))
+    }
     
     var body: some View {
-        let colors = AppColors.currentColorScheme
-        
-        ZStack {
-            // Blur background
-            Color.black.opacity(0.3)
-                .ignoresSafeArea()
-                .onTapGesture { dismiss() }
+        VStack(spacing: 24) {
+            // Month navigation
+            HStack {
+                Button(action: { moveMonth(-1) }) {
+                    Image(systemName: "chevron.left")
+                        .foregroundColor(.primary)
+                }
+                
+                Spacer()
+                
+                Text(monthYearString(from: selectedDate))
+                    .font(.headline)
+                
+                Spacer()
+                
+                Button(action: { moveMonth(1) }) {
+                    Image(systemName: "chevron.right")
+                        .foregroundColor(.primary)
+                }
+            }
+            .padding(.horizontal, 4)
             
-            // Calendar content
-            VStack(spacing: 20) {
-                // Month navigation
-                HStack {
-                    Button(action: { moveMonth(-1) }) {
-                        Image(systemName: "chevron.left")
-                    }
+            // Calendar grid
+            VStack(spacing: 12) {
+                // Weekday headers
+                HStack(spacing: 0) {
+                    Text("WK")
+                        .frame(width: 40, alignment: .leading)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
                     
-                    Spacer()
-                    
-                    Text(monthYearString(from: selectedDate))
-                        .font(.headline)
-                    
-                    Spacer()
-                    
-                    Button(action: { moveMonth(1) }) {
-                        Image(systemName: "chevron.right")
-                    }
-                }
-                .padding(.horizontal)
-                
-                // Week day headers
-                HStack {
-                    ForEach(["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"], id: \.self) { day in
+                    ForEach(weekDays, id: \.self) { day in
                         Text(day)
-                            .font(.caption)
                             .frame(maxWidth: .infinity)
-                            .foregroundColor(colors.caption)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
                     }
                 }
                 
-                // Calendar grid
-                VStack(spacing: 8) {
-                    ForEach(0..<weekRows, id: \.self) { row in
-                        HStack(spacing: 8) {
-                            ForEach(0..<daysInWeek, id: \.self) { column in
-                                let date = getDate(forRow: row, column: column)
-                                if let date = date {
-                                    CalendarDayView(
-                                        date: date,
-                                        isCompleted: HabitEntity.isDateCompleted(habit: habit, date: date),
-                                        color: habit.color,
-                                        isToday: calendar.isDateInToday(date)
-                                    )
-                                    .onTapGesture {
-                                        toggleCompletion(for: date)
-                                    }
-                                } else {
-                                    Color.clear
-                                        .frame(height: 40)
-                                }
+                // Calendar days
+                ForEach(0..<weekRows, id: \.self) { row in
+                    HStack(spacing: 0) {
+                        Text(getWeekNumber(forRow: row))
+                            .frame(width: 40, alignment: .leading)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        
+                        ForEach(0..<daysInWeek, id: \.self) { column in
+                            if let date = getDate(forRow: row, column: column) {
+                                let startOfDay = calendar.startOfDay(for: date)
+                                CalendarDayButton(
+                                    date: date,
+                                    isToday: calendar.isDateInToday(date),
+                                    isCompleted: completedDates.contains(startOfDay),
+                                    color: habit.color,
+                                    isCurrentMonth: calendar.component(.month, from: date) == calendar.component(.month, from: selectedDate),
+                                    onTap: { toggleCompletion(for: date) }
+                                )
+                            } else {
+                                Color.clear
+                                    .frame(maxWidth: .infinity)
+                                    .aspectRatio(1, contentMode: .fit)
                             }
                         }
                     }
                 }
             }
-            .padding()
-            .background(colors.background)
-            .cornerRadius(20)
-            .shadow(radius: 10)
-            .padding(30)
+            
+            Text("Tap dates to add or remove completions")
+                .font(.caption)
+                .foregroundColor(.secondary)
+                .frame(maxWidth: .infinity, alignment: .center)
+                .padding(.top, 8)
         }
+        .padding(24)
+        .background(Color(UIColor.systemBackground))
+        .presentationDetents([.height(480)])
+        .presentationDragIndicator(.visible)
+    }
+    
+    private func toggleCompletion(for date: Date) {
+        let startOfDay = calendar.startOfDay(for: date)
+        let today = calendar.startOfDay(for: Date())
+        
+        guard startOfDay <= today else { return }
+        
+        if completedDates.contains(startOfDay) {
+            completedDates.remove(startOfDay)
+            if let entryToRemove = habit.entries.first(where: { calendar.isDate($0.timestamp, inSameDayAs: startOfDay) }) {
+                modelContext.delete(entryToRemove)
+            }
+        } else {
+            completedDates.insert(startOfDay)
+            let entry = EntryEntity(timestamp: startOfDay)
+            habit.entries.append(entry)
+        }
+        
+        try? modelContext.save()
     }
     
     private func monthYearString(from date: Date) -> String {
@@ -96,6 +134,21 @@ struct CompletionCalendarView: View {
         }
     }
     
+    private func getWeekNumber(forRow row: Int) -> String {
+        if let date = getDate(forRow: row, column: 0) {
+            let weekOfYear = calendar.component(.weekOfYear, from: date)
+            
+            let isFirstRow = row == 0
+            let isLastRow = row == weekRows - 1
+            let isCurrentMonth = calendar.component(.month, from: date) == calendar.component(.month, from: selectedDate)
+            
+            if isFirstRow || isLastRow || isCurrentMonth {
+                return "\(weekOfYear)"
+            }
+        }
+        return ""
+    }
+    
     private func getDate(forRow row: Int, column: Int) -> Date? {
         guard let firstDayOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: selectedDate)) else {
             return nil
@@ -105,51 +158,73 @@ struct CompletionCalendarView: View {
         let offsetDays = (firstWeekday - 2 + daysInWeek) % daysInWeek
         
         let day = row * daysInWeek + column - offsetDays + 1
-        let dateComponents = DateComponents(year: calendar.component(.year, from: selectedDate),
-                                          month: calendar.component(.month, from: selectedDate),
-                                          day: day)
+        var dateComponents = DateComponents(
+            year: calendar.component(.year, from: selectedDate),
+            month: calendar.component(.month, from: selectedDate),
+            day: day
+        )
         
-        guard let date = calendar.date(from: dateComponents),
-              calendar.component(.month, from: date) == calendar.component(.month, from: selectedDate) else {
+        if day < 1 {
+            if let previousMonth = calendar.date(byAdding: .month, value: -1, to: firstDayOfMonth) {
+                let previousMonthDays = calendar.range(of: .day, in: .month, for: previousMonth)?.count ?? 30
+                dateComponents.month = calendar.component(.month, from: previousMonth)
+                dateComponents.year = calendar.component(.year, from: previousMonth)
+                dateComponents.day = previousMonthDays + day
+            }
+        } else if let lastDayOfMonth = calendar.date(byAdding: DateComponents(month: 1, day: -1), to: firstDayOfMonth),
+                day > calendar.component(.day, from: lastDayOfMonth) {
+            if let nextMonth = calendar.date(byAdding: .month, value: 1, to: firstDayOfMonth) {
+                dateComponents.month = calendar.component(.month, from: nextMonth)
+                dateComponents.year = calendar.component(.year, from: nextMonth)
+                dateComponents.day = day - calendar.component(.day, from: lastDayOfMonth)
+            }
+        }
+        
+        guard let date = calendar.date(from: dateComponents) else {
             return nil
         }
         
         return date
     }
-    
-    private func toggleCompletion(for date: Date) {
-        let calendar = Calendar.current
-        let today = calendar.startOfDay(for: Date())
-        let targetDate = calendar.startOfDay(for: date)
-        
-        // Only prevent future dates
-        guard targetDate <= today else { return }
-        
-        HabitEntity.toggleCompletion(habit: habit, date: date, context: modelContext)
-    }
 }
 
-struct CalendarDayView: View {
+struct CalendarDayButton: View {
     let date: Date
+    let isToday: Bool
     let isCompleted: Bool
     let color: Color
-    let isToday: Bool
+    let isCurrentMonth: Bool
+    let onTap: () -> Void
+    
+    private let calendar = Calendar.current
+    private let size: CGFloat = 36
     
     var body: some View {
-        ZStack {
-            Circle()
-                .fill(isCompleted ? color : color.opacity(0.1))
-            
-            if isToday {
-                Circle()
-                    .stroke(color, lineWidth: 2)
-            }
-            
-            Text("\(Calendar.current.component(.day, from: date))")
-                .foregroundColor(isCompleted ? .white : .primary)
+        Button(action: onTap) {
+            Text("\(calendar.component(.day, from: date))")
+                .font(.system(size: 15))
+                .fontWeight(isToday ? .medium : .regular)
+                .frame(maxWidth: .infinity)
+                .frame(height: size)
+                .foregroundColor(foregroundColor)
+                .background(
+                    Circle()
+                        .fill(isCompleted ? color : Color.clear)
+                        .overlay(
+                            Circle()
+                                .strokeBorder(isToday && !isCompleted ? color : Color.clear, lineWidth: 1)
+                        )
+                )
         }
-        .frame(width: 40, height: 40)
+        .buttonStyle(PlainButtonStyle())
+    }
+    
+    private var foregroundColor: Color {
+        if isCompleted {
+            return .white
+        } else if !isCurrentMonth {
+            return Color.secondary.opacity(0.3)
+        }
+        return .primary
     }
 }
-
-// End of file

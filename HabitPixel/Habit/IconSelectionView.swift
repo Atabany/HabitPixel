@@ -3,44 +3,18 @@ import SwiftUI
 struct IconSelectionView: View {
     @Binding var selectedIcon: String
     @State private var searchText = ""
-    @State private var selectedCategory = "All"
+    @State private var selectedCategory = Category.all
     let themeColors = AppColors.currentColorScheme
     
-    private let categories = [
-        "All",
-        "Health",
-        "Learning",
-        "Lifestyle",
-        "Tech",
-        "Nature",
-        "Finance"
-    ]
-    
-    private let icons = [
-        // Health icons
-        ("Health", ["heart", "figure.run", "figure.walk", "heart.fill", "lungs", "pills", "cross", "bed.double", "brain"]),
-        // Learning icons
-        ("Learning", ["book", "pencil", "graduationcap", "books.vertical", "book.closed", "book.closed.fill", "bookmark"]),
-        // Lifestyle icons
-        ("Lifestyle", ["cup.and.saucer", "fork.knife", "shower", "house", "car", "bicycle", "airplane"]),
-        // Tech icons
-        ("Tech", ["macbook", "desktopcomputer", "gamecontroller", "keyboard", "tv", "headphones", "iphone"]),
-        // Nature icons
-        ("Nature", ["leaf", "drop", "flame", "sun.max", "moon", "cloud", "snowflake"]),
-        // Finance icons
-        ("Finance", ["dollarsign.circle", "creditcard", "cart", "bag", "gift", "wallet.pass", "banknote"])
-    ]
-    
-    var filteredIcons: [String] {
-        let allIcons = icons.flatMap { $0.1 }
-        let categoryIcons = selectedCategory == "All"
-            ? allIcons
-            : icons.first(where: { $0.0 == selectedCategory })?.1 ?? []
-        
+    private var filteredIcons: [String] {
+        let allIcons = selectedCategory == .all
+            ? Category.allIcons
+            : selectedCategory.suggestedIcons
+            
         if searchText.isEmpty {
-            return categoryIcons
+            return allIcons
         }
-        return categoryIcons.filter { $0.localizedCaseInsensitiveContains(searchText) }
+        return allIcons.filter { $0.localizedCaseInsensitiveContains(searchText) }
     }
     
     var body: some View {
@@ -66,16 +40,20 @@ struct IconSelectionView: View {
             // Category filter
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
-                    ForEach(categories, id: \.self) { category in
+                    ForEach(Category.categories) { category in
                         Button(action: { selectedCategory = category }) {
-                            Text(category)
-                                .font(.subheadline)
-                                .fontWeight(.medium)
-                                .padding(.horizontal, 16)
-                                .padding(.vertical, 8)
-                                .background(selectedCategory == category ? themeColors.primary : themeColors.surface)
-                                .foregroundColor(selectedCategory == category ? themeColors.onPrimary : themeColors.onBackground)
-                                .clipShape(Capsule())
+                            HStack(spacing: 6) {
+                                Image(systemName: category.icon)
+                                    .font(.caption)
+                                Text(category.name)
+                                    .font(.subheadline)
+                                    .fontWeight(.medium)
+                            }
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
+                            .background(selectedCategory.id == category.id ? themeColors.primary : themeColors.surface)
+                            .foregroundColor(selectedCategory.id == category.id ? themeColors.onPrimary : themeColors.onBackground)
+                            .clipShape(Capsule())
                         }
                     }
                 }
