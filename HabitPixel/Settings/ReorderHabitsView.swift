@@ -2,7 +2,12 @@ import SwiftUI
 import SwiftData
 
 struct ReorderHabitsView: View {
-    @Query(sort: \HabitEntity.createdAt) private var habits: [HabitEntity]
+    @Query(
+        filter: #Predicate<HabitEntity> { habit in
+            habit.isArchived == false
+        },
+        sort: \HabitEntity.createdAt
+    ) private var habits: [HabitEntity]
     @Environment(\.modelContext) private var modelContext
     
     var body: some View {
