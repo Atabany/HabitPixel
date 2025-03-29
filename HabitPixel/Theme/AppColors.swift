@@ -26,6 +26,8 @@ struct AppColors {
     static let darkSurface = Color(hex: 0x07070B)
     static let darkBorder = Color(hex: 0x27272A)
     static let darkCaption = Color(hex: 0x848485)
+    
+    @AppStorage("selectedTheme") static var selectedTheme: ThemeMode = .system
 }
 
 // Custom ColorScheme struct similar to Material's ColorScheme in Android
@@ -46,7 +48,7 @@ struct ColorScheme {
 // Extension to match Android's ColorScheme.onSurface property
 extension ColorScheme {
     var onSurface: Color {
-        return onBackground // In your Android code, onSurface isn't explicitly defined
+        return onBackground
     }
 }
 
@@ -78,9 +80,16 @@ extension AppColors {
         return isDarkMode ? darkColorScheme : lightColorScheme
     }
     
-    // Helper to determine dark mode status
+    // Helper to determine dark mode status based on selected theme
     static var isDarkMode: Bool {
-        return UITraitCollection.current.userInterfaceStyle == .dark
+        switch selectedTheme {
+        case .dark:
+            return true
+        case .light:
+            return false
+        case .system:
+            return UITraitCollection.current.userInterfaceStyle == .dark
+        }
     }
 }
 

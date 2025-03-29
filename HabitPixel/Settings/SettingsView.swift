@@ -2,7 +2,7 @@ import SwiftUI
 
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
-    let colors = AppColors.currentColorScheme
+    let colors = AppColors.currentColorScheme // Assuming AppColors is defined elsewhere
     
     var body: some View {
         NavigationStack {
@@ -12,7 +12,13 @@ struct SettingsView: View {
                     NavigationLink(destination: Text("HabitKit Pro")) {
                         HStack {
                             Image(systemName: "square.grid.2x2.fill")
-//                                .foregroundStyle(.purple, .blue, .green, .yellow)
+                                .foregroundStyle(
+                                    .linearGradient(
+                                        colors: [.purple, .blue, .green, .yellow],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
                             VStack(alignment: .leading) {
                                 Text("Subscribe to HabitKit Pro")
                                     .font(.headline)
@@ -27,18 +33,15 @@ struct SettingsView: View {
                 // App Settings Section
                 Section("App") {
                     NavigationLink(destination: Text("General Settings")) {
-                        SettingsRowView(icon: "gearshape.fill", title: "General", color: .blue)
+                        SettingsRowView(icon: "gearshape.fill", title: "General", color: .pink) // Updated color to match screenshot
                     }
-                    NavigationLink(destination: Text("Theme Settings")) {
+                    NavigationLink(destination: ThemeSettingsView()) {
                         SettingsRowView(icon: "paintbrush.fill", title: "Theme", color: .orange)
                     }
-                    NavigationLink(destination: Text("Archived Habits")) {
-                        SettingsRowView(icon: "archivebox.fill", title: "Archived Habits", color: .gray)
+                    NavigationLink(destination: ArchivedHabitsView()) {
+                        SettingsRowView(icon: "archivebox.fill", title: "Archived Habits", color: .cyan) // Updated color to match screenshot
                     }
-                    NavigationLink(destination: Text("Data Import/Export")) {
-                        SettingsRowView(icon: "square.and.arrow.up.on.square.fill", title: "Data Import/Export", color: .blue)
-                    }
-                    NavigationLink(destination: Text("Reorder Habits")) {
+                    NavigationLink(destination: ReorderHabitsView()) {
                         SettingsRowView(icon: "list.bullet", title: "Reorder Habits", color: .red)
                     }
                 }
@@ -48,16 +51,16 @@ struct SettingsView: View {
                     NavigationLink(destination: Text("Website")) {
                         SettingsRowView(icon: "globe", title: "Website", color: .green)
                     }
-                    NavigationLink(destination: Text("Twitter")) {
-                        SettingsRowView(icon: "bird.fill", title: "Follow on Twitter", color: .blue)
+                    NavigationLink(destination: Text("Follow on Twitter")) {
+                        SettingsRowView(icon: "bird.fill", title: "Follow on Twitter", color: .blue) // Matches screenshot label
                     }
                     NavigationLink(destination: Text("Privacy Policy")) {
-                        SettingsRowView(icon: "lock.fill", title: "Privacy Policy", color: .gray)
+                        SettingsRowView(icon: "lock.fill", title: "Privacy Policy", color: .pink) // Updated color to match screenshot
                     }
                     NavigationLink(destination: Text("Terms of Use")) {
-                        SettingsRowView(icon: "doc.text.fill", title: "Terms of Use", color: .gray)
+                        SettingsRowView(icon: "doc.text.fill", title: "Terms of Use", color: .teal) // Updated color to match screenshot
                     }
-                    NavigationLink(destination: Text("Rate App")) {
+                    NavigationLink(destination: Text("Rate the app")) {
                         SettingsRowView(icon: "star.fill", title: "Rate the app", color: .purple)
                     }
                 }

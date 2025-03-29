@@ -1,5 +1,6 @@
 //
 //  Interval.swift
+//  HabitPixel
 //
 //  Created by Mohamed Elatabany on 22/03/2025.
 //

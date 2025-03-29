@@ -12,19 +12,17 @@ final class HabitEntity {
     var iconName: String
     var category: String
     var createdAt: Date
-    
-    // Color properties
     var colorRed: Double
     var colorGreen: Double
     var colorBlue: Double
     var colorOpacity: Double
-    
-    // Feature properties
     var reminderTime: Date?
     var reminderDays: [String]
     var isArchived: Bool
-    
+    var archivedDate: Date?
     @Relationship(deleteRule: .cascade) var entries: [EntryEntity] = []
+    
+    // Color properties
     
     var color: Color {
         get {
@@ -163,6 +161,7 @@ final class HabitEntity {
         self.reminderTime = reminderTime
         self.reminderDays = reminderDays
         self.isArchived = isArchived
+        self.archivedDate = nil
         
         var red: CGFloat = 0
         var green: CGFloat = 0

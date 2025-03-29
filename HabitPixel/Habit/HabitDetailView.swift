@@ -2,7 +2,7 @@ import SwiftUI
 import SwiftData
 
 struct HabitDetailView: View {
-    @Environment(\.dismiss) var dismiss
+    @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     let habit: HabitEntity
     @State private var showingCalendar = false
@@ -10,6 +10,12 @@ struct HabitDetailView: View {
     @State private var showingDeleteAlert = false
     
 
+    private func archiveHabit() {
+        habit.isArchived = true
+        habit.archivedDate = Date()
+        dismiss()
+    }
+    
     var body: some View {
         VStack(spacing: 16) {
             let colors = AppColors.currentColorScheme
@@ -108,6 +114,13 @@ struct HabitDetailView: View {
                         }
                     }
                     .foregroundColor(colors.onBackground)
+                    
+                    Button(role: .destructive, action: archiveHabit) {
+                        HStack {
+                            Image(systemName: "archivebox.fill")
+                            Text("Archive Habit")
+                        }
+                    }
                 }
                 .padding()
                 .background(colors.background)
