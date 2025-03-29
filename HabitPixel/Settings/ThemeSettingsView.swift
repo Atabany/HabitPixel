@@ -1,5 +1,16 @@
 import SwiftUI
 
+private struct ThemeKey: EnvironmentKey {
+    static let defaultValue: ThemeMode = .system
+}
+
+extension EnvironmentValues {
+    var appTheme: ThemeMode {
+        get { self[ThemeKey.self] }
+        set { self[ThemeKey.self] = newValue }
+    }
+}
+
 enum ThemeMode: String, CaseIterable {
     case system = "System"
     case light = "Light"
@@ -7,10 +18,9 @@ enum ThemeMode: String, CaseIterable {
 }
 
 struct ThemeSettingsView: View {
-    @AppStorage("selectedTheme") private var selectedTheme: ThemeMode = .system
+    @EnvironmentObject private var themeManager: ThemeManager
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var systemColorScheme
-    let colors = AppColors.currentColorScheme
     
     var body: some View {
         List {
@@ -19,7 +29,7 @@ struct ThemeSettingsView: View {
                     HStack {
                         Text(mode.rawValue)
                         Spacer()
-                        if selectedTheme == mode {
+                        if themeManager.currentColorScheme == (mode == .dark ? .dark : mode == .light ? .light : nil) {
                             Image(systemName: "checkmark.circle.fill")
                                 .foregroundColor(.purple)
                         }
@@ -27,13 +37,13 @@ struct ThemeSettingsView: View {
                     .contentShape(Rectangle())
                     .onTapGesture {
                         withAnimation {
-                            selectedTheme = mode
+                            themeManager.updateTheme(to: mode)
                         }
                     }
                 }
             }
         }
         .navigationTitle("Theme")
-        .preferredColorScheme(selectedTheme == .dark ? .dark : selectedTheme == .light ? .light : nil)
+        .applyTheme(themeManager)
     }
 }

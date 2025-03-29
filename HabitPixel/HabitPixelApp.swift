@@ -12,6 +12,7 @@ import SwiftData
 struct HabitPixelApp: App {
     @AppStorage("selectedTheme") private var selectedTheme: ThemeMode = .system
     let container: ModelContainer
+    @StateObject private var themeManager = ThemeManager()
     
     init() {
         do {
@@ -26,19 +27,9 @@ struct HabitPixelApp: App {
     var body: some Scene {
         WindowGroup {
             HabitKitView()
-                .preferredColorScheme(getColorScheme())
+                .applyTheme(themeManager)
+                .environmentObject(themeManager)
         }
         .modelContainer(container)
-    }
-    
-    private func getColorScheme() -> SwiftUI.ColorScheme? {
-        switch selectedTheme {
-        case .light:
-            return .light
-        case .dark:
-            return .dark
-        case .system:
-            return nil
-        }
     }
 }
