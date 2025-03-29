@@ -8,12 +8,15 @@ struct HabitDetailView: View {
     @State private var showingCalendar = false
     @State private var showingEdit = false
     @State private var showingDeleteAlert = false
+    @State private var showingArchiveAlert = false
     
-
     private func archiveHabit() {
-        habit.isArchived = true
-        habit.archivedDate = Date()
-        dismiss()
+        withAnimation {
+            habit.isArchived = true
+            habit.archivedDate = Date()
+            try? modelContext.save()
+            dismiss()
+        }
     }
     
     var body: some View {
@@ -92,6 +95,7 @@ struct HabitDetailView: View {
                         Button(action: { showingCalendar = true }) {
                             VStack(spacing: 4) {
                                 Image(systemName: "calendar")
+                                    .font(.title3)
                                 Text("Calendar")
                                     .font(.caption)
                             }
@@ -100,7 +104,17 @@ struct HabitDetailView: View {
                         Button(action: { showingEdit = true }) {
                             VStack(spacing: 4) {
                                 Image(systemName: "square.and.pencil")
+                                    .font(.title3)
                                 Text("Edit")
+                                    .font(.caption)
+                            }
+                        }
+                        
+                        Button(action: { showingArchiveAlert = true }) {
+                            VStack(spacing: 4) {
+                                Image(systemName: "archivebox")
+                                    .font(.title3)
+                                Text("Archive")
                                     .font(.caption)
                             }
                         }
@@ -108,19 +122,14 @@ struct HabitDetailView: View {
                         Button(action: { showingDeleteAlert = true }) {
                             VStack(spacing: 4) {
                                 Image(systemName: "trash")
+                                    .font(.title3)
                                 Text("Delete")
                                     .font(.caption)
                             }
                         }
+                        .foregroundStyle(.red)
                     }
                     .foregroundColor(colors.onBackground)
-                    
-                    Button(role: .destructive, action: archiveHabit) {
-                        HStack {
-                            Image(systemName: "archivebox.fill")
-                            Text("Archive Habit")
-                        }
-                    }
                 }
                 .padding()
                 .background(colors.background)
@@ -134,6 +143,14 @@ struct HabitDetailView: View {
         }
         .sheet(isPresented: $showingEdit) {
             NewHabitView(editingHabit: habit)
+        }
+        .alert("Archive Habit", isPresented: $showingArchiveAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Archive") {
+                archiveHabit()
+            }
+        } message: {
+            Text("This habit will be moved to archives. You can restore it later.")
         }
         .alert("Delete Habit", isPresented: $showingDeleteAlert) {
             Button("Cancel", role: .cancel) { }

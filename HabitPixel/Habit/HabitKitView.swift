@@ -105,7 +105,12 @@ struct HabitCardView: View {
 
 // Main view
 struct HabitKitView: View {
-    @Query(sort: \HabitEntity.createdAt) private var habits: [HabitEntity]
+    @Query(
+        filter: #Predicate<HabitEntity> { habit in
+            habit.isArchived == false
+        },
+        sort: \HabitEntity.createdAt
+    ) private var habits: [HabitEntity]
     @Environment(\.modelContext) private var modelContext
     
     @State private var showingNewHabit = false

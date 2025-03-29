@@ -28,6 +28,10 @@ struct StreakGoalView: View {
                 ForEach(intervals, id: \.interval) { item in
                     Button(action: {
                         selectedInterval = item.interval
+                        // Set completions to 1 for daily habits
+                        if item.interval == .daily {
+                            completionsPerInterval = 1
+                        }
                     }) {
                         HStack {
                             VStack(alignment: .leading) {
@@ -50,7 +54,7 @@ struct StreakGoalView: View {
                 }
             }
             
-            if selectedInterval != .none {
+            if selectedInterval != .none && selectedInterval != .daily {
                 Section(header: Text("Completions Goal").foregroundColor(themeColors.onBackground)) {
                     VStack(alignment: .leading, spacing: 10) {
                         Text("How many times do you want to complete this habit per \(selectedInterval.rawValue)?")
@@ -69,6 +73,12 @@ struct StreakGoalView: View {
                     }
                     .padding(.vertical, 8)
                 }
+            } else if selectedInterval == .daily {
+                Section {
+                    Text("Daily habits are completed once per day")
+                        .font(.subheadline)
+                        .foregroundColor(themeColors.caption)
+                }
             }
         }
         .background(themeColors.background)
@@ -78,7 +88,7 @@ struct StreakGoalView: View {
     private func getGoalDescription() -> String {
         switch selectedInterval {
         case .daily:
-            return "Complete this habit \(completionsPerInterval) time\(completionsPerInterval > 1 ? "s" : "") each day"
+            return "Complete this habit once each day"
         case .weekly:
             return "Complete this habit \(completionsPerInterval) time\(completionsPerInterval > 1 ? "s" : "") each week"
         case .monthly:
