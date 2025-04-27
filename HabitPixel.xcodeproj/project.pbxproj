@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		2D99F0FB2D987A57009C7A8F /* HabitPixelWidget.appex in Embed ExtensionKit Extensions */ = {isa = PBXBuildFile; fileRef = 2D99F0EF2D987A56009C7A8F /* HabitPixelWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		2D24EF732D8E134700B3991F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -21,12 +25,34 @@
 			remoteGlobalIDString = 2D24EF5C2D8E134600B3991F;
 			remoteInfo = HabitPixel;
 		};
+		2D99F0F92D987A57009C7A8F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2D24EF552D8E134600B3991F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2D99F0EE2D987A56009C7A8F;
+			remoteInfo = HabitPixelWidget;
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		2D99F1002D987A57009C7A8F /* Embed ExtensionKit Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(EXTENSIONS_FOLDER_PATH)";
+			dstSubfolderSpec = 16;
+			files = (
+				2D99F0FB2D987A57009C7A8F /* HabitPixelWidget.appex in Embed ExtensionKit Extensions */,
+			);
+			name = "Embed ExtensionKit Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		2D24EF5D2D8E134600B3991F /* HabitPixel.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HabitPixel.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2D24EF722D8E134700B3991F /* HabitPixelTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HabitPixelTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		2D24EF7C2D8E134700B3991F /* HabitPixelUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HabitPixelUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		2D99F0EF2D987A56009C7A8F /* HabitPixelWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.extensionkit-extension"; includeInIndex = 0; path = HabitPixelWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -37,6 +63,20 @@
 			);
 			target = 2D24EF5C2D8E134600B3991F /* HabitPixel */;
 		};
+		2D99F0FF2D987A57009C7A8F /* Exceptions for "HabitPixelWidget" folder in "HabitPixelWidget" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 2D99F0EE2D987A56009C7A8F /* HabitPixelWidget */;
+		};
+		2D99F10C2D98808A009C7A8F /* Exceptions for "HabitPixel" folder in "HabitPixelWidget" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Shared/WidgetModels.swift,
+			);
+			target = 2D99F0EE2D987A56009C7A8F /* HabitPixelWidget */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -44,6 +84,7 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				2D24EF972D8E16D100B3991F /* Exceptions for "HabitPixel" folder in "HabitPixel" target */,
+				2D99F10C2D98808A009C7A8F /* Exceptions for "HabitPixel" folder in "HabitPixelWidget" target */,
 			);
 			path = HabitPixel;
 			sourceTree = "<group>";
@@ -56,6 +97,14 @@
 		2D24EF7F2D8E134700B3991F /* HabitPixelUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = HabitPixelUITests;
+			sourceTree = "<group>";
+		};
+		2D99F0F02D987A56009C7A8F /* HabitPixelWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				2D99F0FF2D987A57009C7A8F /* Exceptions for "HabitPixelWidget" folder in "HabitPixelWidget" target */,
+			);
+			path = HabitPixelWidget;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -82,6 +131,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		2D99F0EC2D987A56009C7A8F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -91,6 +147,7 @@
 				2D24EF5F2D8E134600B3991F /* HabitPixel */,
 				2D24EF752D8E134700B3991F /* HabitPixelTests */,
 				2D24EF7F2D8E134700B3991F /* HabitPixelUITests */,
+				2D99F0F02D987A56009C7A8F /* HabitPixelWidget */,
 				2D24EF5E2D8E134600B3991F /* Products */,
 			);
 			sourceTree = "<group>";
@@ -101,6 +158,7 @@
 				2D24EF5D2D8E134600B3991F /* HabitPixel.app */,
 				2D24EF722D8E134700B3991F /* HabitPixelTests.xctest */,
 				2D24EF7C2D8E134700B3991F /* HabitPixelUITests.xctest */,
+				2D99F0EF2D987A56009C7A8F /* HabitPixelWidget.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -115,10 +173,12 @@
 				2D24EF592D8E134600B3991F /* Sources */,
 				2D24EF5A2D8E134600B3991F /* Frameworks */,
 				2D24EF5B2D8E134600B3991F /* Resources */,
+				2D99F1002D987A57009C7A8F /* Embed ExtensionKit Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				2D99F0FA2D987A57009C7A8F /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				2D24EF5F2D8E134600B3991F /* HabitPixel */,
@@ -176,6 +236,28 @@
 			productReference = 2D24EF7C2D8E134700B3991F /* HabitPixelUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		2D99F0EE2D987A56009C7A8F /* HabitPixelWidget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2D99F0FC2D987A57009C7A8F /* Build configuration list for PBXNativeTarget "HabitPixelWidget" */;
+			buildPhases = (
+				2D99F0EB2D987A56009C7A8F /* Sources */,
+				2D99F0EC2D987A56009C7A8F /* Frameworks */,
+				2D99F0ED2D987A56009C7A8F /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				2D99F0F02D987A56009C7A8F /* HabitPixelWidget */,
+			);
+			name = HabitPixelWidget;
+			packageProductDependencies = (
+			);
+			productName = HabitPixelWidget;
+			productReference = 2D99F0EF2D987A56009C7A8F /* HabitPixelWidget.appex */;
+			productType = "com.apple.product-type.extensionkit-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -197,6 +279,9 @@
 						CreatedOnToolsVersion = 16.2;
 						TestTargetID = 2D24EF5C2D8E134600B3991F;
 					};
+					2D99F0EE2D987A56009C7A8F = {
+						CreatedOnToolsVersion = 16.2;
+					};
 				};
 			};
 			buildConfigurationList = 2D24EF582D8E134600B3991F /* Build configuration list for PBXProject "HabitPixel" */;
@@ -216,6 +301,7 @@
 				2D24EF5C2D8E134600B3991F /* HabitPixel */,
 				2D24EF712D8E134700B3991F /* HabitPixelTests */,
 				2D24EF7B2D8E134700B3991F /* HabitPixelUITests */,
+				2D99F0EE2D987A56009C7A8F /* HabitPixelWidget */,
 			);
 		};
 /* End PBXProject section */
@@ -236,6 +322,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		2D24EF7A2D8E134700B3991F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2D99F0ED2D987A56009C7A8F /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -266,6 +359,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		2D99F0EB2D987A56009C7A8F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -278,6 +378,11 @@
 			isa = PBXTargetDependency;
 			target = 2D24EF5C2D8E134600B3991F /* HabitPixel */;
 			targetProxy = 2D24EF7D2D8E134700B3991F /* PBXContainerItemProxy */;
+		};
+		2D99F0FA2D987A57009C7A8F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 2D99F0EE2D987A56009C7A8F /* HabitPixelWidget */;
+			targetProxy = 2D99F0F92D987A57009C7A8F /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -406,9 +511,11 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = HabitPixel/HabitPixel.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"HabitPixel/Preview Content\"";
+				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = HabitPixel/Info.plist;
@@ -435,9 +542,11 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = HabitPixel/HabitPixel.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"HabitPixel/Preview Content\"";
+				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = HabitPixel/Info.plist;
@@ -527,6 +636,66 @@
 			};
 			name = Release;
 		};
+		2D99F0FD2D987A57009C7A8F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = HabitPixelWidget/HabitPixelWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = HabitPixelWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = HabitPixelWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.atabany.HabitPixel.widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		2D99F0FE2D987A57009C7A8F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = HabitPixelWidget/HabitPixelWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = HabitPixelWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = HabitPixelWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.atabany.HabitPixel.widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -562,6 +731,15 @@
 			buildConfigurations = (
 				2D24EF8D2D8E134700B3991F /* Debug */,
 				2D24EF8E2D8E134700B3991F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		2D99F0FC2D987A57009C7A8F /* Build configuration list for PBXNativeTarget "HabitPixelWidget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2D99F0FD2D987A57009C7A8F /* Debug */,
+				2D99F0FE2D987A57009C7A8F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

@@ -233,13 +233,8 @@ struct HabitKitView: View {
         modelContext.insert(habit)
     }
     
-    private func deleteHabit(_ habit: HabitEntity) {
-        modelContext.delete(habit)
-        try? modelContext.save()
-    }
-    
     private func toggleTodayCompletion(for habit: HabitEntity) {
-        HabitEntity.toggleCompletion(habit: habit, date: Date(), context: modelContext)
+        HabitEntity.toggleCompletion(habit: habit, date: Date(), context: modelContext, allHabits: habits)
     }
     
     private func isTodayCompleted(for habit: HabitEntity) -> Bool {

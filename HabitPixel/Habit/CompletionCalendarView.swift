@@ -9,6 +9,7 @@ struct CompletionCalendarView: View {
     @State private var completedDates: Set<Date>
     
     @Environment(\.modelContext) private var modelContext
+    @Query private var allHabits: [HabitEntity]
     
     private let calendar = Calendar.current
     private let daysInWeek = 7
@@ -103,23 +104,21 @@ struct CompletionCalendarView: View {
     }
     
     private func toggleCompletion(for date: Date) {
-        let startOfDay = calendar.startOfDay(for: date)
         let today = calendar.startOfDay(for: Date())
+        let targetDate = calendar.startOfDay(for: date)
         
-        guard startOfDay <= today else { return }
+        guard targetDate <= today else { return }
         
-        if completedDates.contains(startOfDay) {
-            completedDates.remove(startOfDay)
-            if let entryToRemove = habit.entries.first(where: { calendar.isDate($0.timestamp, inSameDayAs: startOfDay) }) {
-                modelContext.delete(entryToRemove)
+        withAnimation(.easeInOut(duration: 0.05)) {
+            HabitEntity.toggleCompletion(habit: habit, date: date, context: modelContext, allHabits: allHabits)
+            
+            // Update completedDates Set to reflect the new state
+            if completedDates.contains(targetDate) {
+                completedDates.remove(targetDate)
+            } else {
+                completedDates.insert(targetDate)
             }
-        } else {
-            completedDates.insert(startOfDay)
-            let entry = EntryEntity(timestamp: startOfDay)
-            habit.entries.append(entry)
         }
-        
-        try? modelContext.save()
     }
     
     private func monthYearString(from date: Date) -> String {
@@ -199,6 +198,11 @@ struct CalendarDayButton: View {
     private let calendar = Calendar.current
     private let size: CGFloat = 36
     
+    private var isFutureDate: Bool {
+        let today = calendar.startOfDay(for: Date())
+        return date > today
+    }
+    
     var body: some View {
         Button(action: onTap) {
             Text("\(calendar.component(.day, from: date))")
@@ -217,10 +221,13 @@ struct CalendarDayButton: View {
                 )
         }
         .buttonStyle(PlainButtonStyle())
+        .disabled(isFutureDate)
     }
     
     private var foregroundColor: Color {
-        if isCompleted {
+        if isFutureDate {
+            return Color.gray.opacity(0.3)
+        } else if isCompleted {
             return .white
         } else if !isCurrentMonth {
             return Color.secondary.opacity(0.3)

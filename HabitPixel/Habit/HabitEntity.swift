@@ -1,6 +1,7 @@
 import Foundation
 import SwiftUI
 import SwiftData
+import WidgetKit
 
 @Model
 final class HabitEntity {
@@ -263,28 +264,41 @@ extension HabitEntity {
         }.count
     }
     
-    static func toggleCompletion(habit: HabitEntity, date: Date, context: ModelContext) {
+    static func toggleCompletion(habit: HabitEntity, date: Date, context: ModelContext, allHabits: [HabitEntity]) {
         let calendar = Calendar.current
         let startOfDay = calendar.startOfDay(for: date)
         
+        // Reset cache to ensure fresh state
+        habit.invalidateCache()
         habit.ensureCacheInitialized()
         
-        if habit.completionCache?.isCompleted(startOfDay) ?? false {
-            // Remove completion
-            if let existingEntry = habit.entries.first(where: {
-                calendar.isDate($0.timestamp, inSameDayAs: startOfDay)
-            }) {
-                context.delete(existingEntry)
-                habit.completionCache?.removeCompletion(startOfDay)
+        // Check entries directly instead of relying on cache first
+        let existingEntries = habit.entries.filter { entry in
+            calendar.isDate(calendar.startOfDay(for: entry.timestamp), inSameDayAs: startOfDay)
+        }
+        
+        if !existingEntries.isEmpty {
+            // Remove all completions for this day
+            for entry in existingEntries {
+                context.delete(entry)
             }
+            habit.completionCache?.removeCompletion(startOfDay)
         } else {
             // Add completion
             let entry = EntryEntity(timestamp: startOfDay, habit: habit)
             habit.entries.append(entry)
             habit.completionCache?.addCompletion(startOfDay)
         }
-        
+
+        // Force save and ensure cache is updated
         try? context.save()
+        
+        // Reset cache after save to ensure fresh state
+        habit.invalidateCache()
+        
+        // Update widget
+        updateWidgetHabits(allHabits)
+        WidgetCenter.shared.reloadAllTimelines()
     }
     
     static func isDateCompleted(habit: HabitEntity, date: Date) -> Bool {
@@ -336,5 +350,37 @@ extension HabitEntity {
     
     func invalidateCache() {
         completionCache = nil
+    }
+    
+    static func updateWidgetHabits(_ habits: [HabitEntity]) {
+        let calendar = Calendar.current
+        let displayHabits = habits.map { habit -> HabitDisplayInfo in
+            let entries = habit.entries
+            let completedDates = Set(entries.map { calendar.startOfDay(for: $0.timestamp) })
+            let startDate: Date
+            let endDate: Date
+            if let first = entries.min(by: { $0.timestamp < $1.timestamp })?.timestamp,
+                let last = entries.max(by: { $0.timestamp < $1.timestamp })?.timestamp {
+                startDate = calendar.startOfDay(for: first)
+                endDate = calendar.startOfDay(for: last)
+            } else {
+                startDate = calendar.startOfDay(for: habit.createdAt)
+                endDate = calendar.startOfDay(for: Date())
+            }
+            return HabitDisplayInfo(
+                id: "\(habit.persistentModelID)",
+                title: habit.title,
+                iconName: habit.iconName,
+                color: habit.color,
+                completedDates: completedDates,
+                startDate: startDate,
+                endDate: endDate
+            )
+        }
+
+        if let defaults = UserDefaults(suiteName: "group.com.atabany.HabitPixel"),
+            let data = try? JSONEncoder().encode(displayHabits) {
+            defaults.set(data, forKey: "WidgetHabits")
+        }
     }
 }

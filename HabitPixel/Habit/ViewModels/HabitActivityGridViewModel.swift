@@ -1,4 +1,5 @@
 import SwiftUI
+import WidgetKit
 import SwiftData
 
 @MainActor
@@ -24,26 +25,41 @@ final class HabitActivityGridViewModel: ObservableObject {
     @Published private(set) var isUpdating = false
     @Published private(set) var currentStreak = 0
     
-    init(habit: HabitEntity) {
+    var allHabits: [HabitEntity]
+    
+    init(habit: HabitEntity, allHabits: [HabitEntity]) {
         self.habit = habit
+        self.allHabits = allHabits
+        // Initial widget sync
+        Self.syncWidget(allHabits)
     }
     
     func loadInitialData() async {
         gridData = await calculateGridData()
         calculateStreak()
+        Self.syncWidget(allHabits)
     }
     
     func updateGridData() async {
-        isUpdating = true
-        defer { isUpdating = false }
+        guard !isUpdating else { return }
         
+        isUpdating = true
         let newData = await calculateGridData()
-        if gridData != newData {
+        
+        await MainActor.run {
             withAnimation(.easeInOut(duration: 0.2)) {
-                gridData = newData
-                calculateStreak()
+                self.gridData = newData
+                self.calculateStreak()
             }
+            self.isUpdating = false
+            Self.syncWidget(self.allHabits)
         }
+    }
+
+    // Static helper to ensure consistent widget syncing
+    private static func syncWidget(_ habits: [HabitEntity]) {
+        HabitEntity.updateWidgetHabits(habits)
+        WidgetCenter.shared.reloadAllTimelines()
     }
     
     func getDate(weekIndex: Int, dayIndex: Int, startDate: Date) -> Date {
@@ -53,23 +69,26 @@ final class HabitActivityGridViewModel: ObservableObject {
     }
     
     func getCellOpacity(for date: Date, isCompleted: Bool) -> Double {
-        guard let data = gridData,
-              let (firstDate, lastDate) = data.dateRange else {
-            return 0.15
-        }
-        
         let startOfDay = calendar.startOfDay(for: date)
         
+        // Completed dates always have full opacity
         if isCompleted {
             return 1.0
         }
         
-        if let first = firstDate,
-           startOfDay >= calendar.startOfDay(for: first),
-           startOfDay <= calendar.startOfDay(for: lastDate) {
-            return 0.3
+        // Get first and last completion dates
+        let firstCompletionDate = habit.sortedEntries.first.map { calendar.startOfDay(for: $0) }
+        let lastCompletionDate = habit.sortedEntries.last.map { calendar.startOfDay(for: $0) }
+        
+        // Within habit's completion range (first completion to last completion)
+        if let firstDate = firstCompletionDate,
+           let lastDate = lastCompletionDate,
+           startOfDay >= firstDate,
+           startOfDay <= lastDate {
+            return 0.4
         }
         
+        // Before first completion or after last completion
         return 0.15
     }
     
@@ -81,18 +100,6 @@ final class HabitActivityGridViewModel: ObservableObject {
             withAnimation {
                 proxy.scrollTo(currentWeek, anchor: .trailing)
             }
-        }
-    }
-    
-    func toggleCompletion(for date: Date) {
-        let today = calendar.startOfDay(for: Date())
-        let targetDate = calendar.startOfDay(for: date)
-        
-        guard targetDate <= today else { return }
-        
-        withAnimation(.easeInOut(duration: 0.05)) {
-            HabitEntity.toggleCompletion(habit: habit, date: date, context: habit.modelContext!)
-            calculateStreak()
         }
     }
     
@@ -132,23 +139,23 @@ final class HabitActivityGridViewModel: ObservableObject {
     private func calculateGridData() async -> GridData {
         try? await Task.sleep(nanoseconds: 100_000_000)
         
-        let defaultDate = calendar.date(byAdding: .month, value: -15, to: calendar.startOfDay(for: Date())) ?? Date()
+        // Get today's date at start of day
+        let now = Date()
+        let today = calendar.startOfDay(for: now)
         
-        let startDate: Date
-        if let earliestEntry = habit.entries.min(by: { $0.timestamp < $1.timestamp }) {
-            let entryDate = calendar.startOfDay(for: earliestEntry.timestamp)
-            if entryDate < defaultDate {
-                startDate = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: entryDate)) ?? entryDate
-            } else {
-                startDate = defaultDate
-            }
-        } else {
-            startDate = defaultDate
-        }
+        // Calculate default date based on creation date
+        let defaultStartDate = min(
+            calendar.startOfDay(for: habit.createdAt),
+            calendar.date(byAdding: .month, value: -15, to: today) ?? today
+        )
         
-        let today = calendar.startOfDay(for: Date())
+        // Align to start of week
+        let startDate = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: defaultStartDate)) ?? defaultStartDate
+        
+        // Calculate weeks including the current week
         let components = calendar.dateComponents([.weekOfYear], from: startDate, to: today)
-        let numberOfWeeks = (components.weekOfYear ?? 0) + 1
+        let numberOfWeeks = max((components.weekOfYear ?? 0) + 1, 1)  // Ensure at least 1 week
+        
         
         let completedDates = await withTaskGroup(of: Set<Date>.self) { group in
             let batchSize = 100
@@ -171,12 +178,14 @@ final class HabitActivityGridViewModel: ObservableObject {
             return result
         }
         
-        let dateRange: (first: Date?, last: Date)?
-        if !habit.sortedEntries.isEmpty {
-            dateRange = (habit.sortedEntries.first, habit.sortedEntries.last!)
-        } else {
-            dateRange = nil
-        }
+        // Always include today in the date range
+        let dateRange: (first: Date?, last: Date)? = {
+            if !habit.sortedEntries.isEmpty {
+                return (habit.sortedEntries.first, today)
+            } else {
+                return (startDate, today)
+            }
+        }()
         
         return GridData(
             startDate: startDate,
