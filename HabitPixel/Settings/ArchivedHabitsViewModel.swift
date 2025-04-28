@@ -21,7 +21,8 @@ class ArchivedHabitsViewModel: ObservableObject {
         do {
             archivedHabits = try modelContext.fetch(descriptor)
         } catch {
-            print("Failed to fetch archived habits: \(error)")
+            // Log or handle error fetching archived habits
+            // Error: \(error)
         }
     }
     
@@ -33,7 +34,8 @@ class ArchivedHabitsViewModel: ObservableObject {
             try modelContext.save()
             loadArchivedHabits() // Refresh the list
         } catch {
-            print("Failed to unarchive habit: \(error)")
+            // Log or handle error unarchiving habit
+            // Error: \(error)
         }
     }
     
@@ -44,7 +46,8 @@ class ArchivedHabitsViewModel: ObservableObject {
             try modelContext.save()
             loadArchivedHabits() // Refresh the list
         } catch {
-            print("Failed to delete habit: \(error)")
+            // Log or handle error deleting archived habit
+            // Error: \(error)
         }
     }
 }

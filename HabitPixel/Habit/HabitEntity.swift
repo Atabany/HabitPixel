@@ -177,6 +177,40 @@ final class HabitEntity {
 }
 
 extension HabitEntity {
+    // Add this method to properly calculate streaks within a time interval
+    func calculateStreak(within interval: DateInterval) -> Int {
+        let filteredEntries = entries
+            .filter { interval.contains($0.timestamp) }
+            .map { Calendar.current.startOfDay(for: $0.timestamp) }
+            .sorted()
+        
+        guard !filteredEntries.isEmpty else { return 0 }
+        
+        var currentStreak = 1
+        var maxStreak = 1
+        let calendar = Calendar.current
+        
+        for i in 1..<filteredEntries.count {
+            let previousDay = filteredEntries[i - 1]
+            let currentDay = filteredEntries[i]
+            
+            if calendar.isDate(currentDay, inSameDayAs: previousDay) {
+                continue
+            }
+            
+            let daysBetween = calendar.dateComponents([.day], from: previousDay, to: currentDay).day ?? 0
+            
+            if daysBetween == 1 {
+                currentStreak += 1
+                maxStreak = max(maxStreak, currentStreak)
+            } else {
+                currentStreak = 1
+            }
+        }
+        
+        return maxStreak
+    }
+    
     private var intervalType: Interval {
         Interval(rawValue: frequency) ?? .daily
     }

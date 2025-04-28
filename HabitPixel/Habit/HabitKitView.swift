@@ -115,6 +115,7 @@ struct HabitKitView: View {
     
     @State private var showingNewHabit = false
     @State private var showingSettings = false
+    @State private var showingStats = false
     @State private var selectedCategory: Category = .all
     
     var activeCategories: [Category] {
@@ -203,7 +204,7 @@ struct HabitKitView: View {
                             .foregroundColor(colors.onBackground)
                     }
                     
-                    Button(action: {}) {
+                    Button(action: { showingStats = true }) {  
                         Image(systemName: "chart.bar.fill")
                             .foregroundColor(colors.onBackground)
                     }
@@ -219,6 +220,9 @@ struct HabitKitView: View {
             }
             .sheet(isPresented: $showingSettings) {
                 SettingsView()
+            }
+            .sheet(isPresented: $showingStats) {
+                GlobalStatsView()
             }
             .onChange(of: habits) { _, _ in
                 // If the selected category no longer has habits, switch to "All"

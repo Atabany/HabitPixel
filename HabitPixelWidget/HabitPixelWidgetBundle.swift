@@ -1,3 +1,5 @@
+// HabitPixelWidgetBundle.swift
+
 import WidgetKit
 import SwiftUI
 

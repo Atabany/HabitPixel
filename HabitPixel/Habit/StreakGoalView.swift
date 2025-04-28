@@ -13,7 +13,6 @@ struct StreakGoalView: View {
     let themeColors = AppColors.currentColorScheme
     
     private let intervals = [
-        (interval: Interval.none, description: "No specific goal"),
         (interval: Interval.daily, description: "Daily goal"),
         (interval: Interval.weekly, description: "Weekly goal"),
         (interval: Interval.monthly, description: "Monthly goal")
@@ -54,10 +53,10 @@ struct StreakGoalView: View {
                 }
             }
             
-            if selectedInterval != .none && selectedInterval != .daily {
+            if selectedInterval != .daily {
                 Section(header: Text("Completions Goal").foregroundColor(themeColors.onBackground)) {
                     VStack(alignment: .leading, spacing: 10) {
-                        Text("How many times do you want to complete this habit per \(selectedInterval.rawValue)?")
+                        Text("How many times do you want to complete this habit \(selectedInterval.rawValue)?")
                             .font(.subheadline)
                             .foregroundColor(themeColors.caption)
                         
@@ -93,8 +92,6 @@ struct StreakGoalView: View {
             return "Complete this habit \(completionsPerInterval) time\(completionsPerInterval > 1 ? "s" : "") each week"
         case .monthly:
             return "Complete this habit \(completionsPerInterval) time\(completionsPerInterval > 1 ? "s" : "") each month"
-        case .none:
-            return ""
         }
     }
 }

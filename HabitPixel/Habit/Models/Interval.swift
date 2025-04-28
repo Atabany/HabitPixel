@@ -8,7 +8,6 @@
 import SwiftUI
 
 enum Interval: String, CaseIterable, Identifiable {
-    case none = "None"
     case daily = "Daily"
     case weekly = "Weekly"
     case monthly = "Monthly"
@@ -17,7 +16,7 @@ enum Interval: String, CaseIterable, Identifiable {
     
     var calendarComponent: Calendar.Component {
         switch self {
-        case .daily, .none: return .day
+        case .daily: return .day
         case .weekly: return .weekOfYear
         case .monthly: return .month
         }
@@ -29,7 +28,7 @@ enum Interval: String, CaseIterable, Identifiable {
         let startOfDay = calendar.startOfDay(for: date)
         
         switch self {
-        case .daily, .none:
+        case .daily:
             let end = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
             return (startOfDay, end)
             
