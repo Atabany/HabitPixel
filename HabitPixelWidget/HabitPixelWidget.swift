@@ -131,20 +131,20 @@ struct ActivityGridView: View {
         
         let startOfDay = calendar.startOfDay(for: date)
         let today = calendar.startOfDay(for: Date())
-        let habitStart = calendar.startOfDay(for: habit.startDate)
-        let habitEnd = calendar.startOfDay(for: habit.endDate)
         
-        // Future dates
-        if startOfDay > today {
-            return 0.15
+        // Get first and last completion dates
+        let firstCompletionDate = habit.completedDates.min()
+        let lastCompletionDate = habit.completedDates.max()
+        
+        // Within habit's completion range (first completion to last completion)
+        if let firstDate = firstCompletionDate,
+           let lastDate = lastCompletionDate,
+           startOfDay >= firstDate,
+           startOfDay <= lastDate {
+            return 0.4
         }
         
-        // Past dates within range
-        if startOfDay >= habitStart && startOfDay <= habitEnd {
-            return 0.3
-        }
-        
-        // Dates outside range
+        // Before first completion or after last completion
         return 0.15
     }
 }
@@ -241,12 +241,10 @@ struct Provider: AppIntentTimelineProvider {
              intentForEntry = HabitSelectionIntent(habit: HabitEntity(id: finalHabit.id, title: finalHabit.title))
         }
 
-        // Set refresh policy only if we have a real habit
-        if finalHabit.id != Provider.noHabitDisplayInfo.id {
-            let currentDate = Date()
-            let nextUpdateDate = Calendar.current.date(byAdding: .minute, value: 30, to: currentDate)!
-            policy = .after(nextUpdateDate)
-        }
+        // Set refresh policy to update more frequently
+        let currentDate = Date()
+        let nextUpdateDate = Calendar.current.date(byAdding: .minute, value: 5, to: currentDate)!
+        policy = .after(nextUpdateDate)
 
         let entries = [HabitEntry(date: Date(), habit: finalHabit, configuration: intentForEntry)]
         return Timeline(entries: entries, policy: policy)
@@ -254,23 +252,29 @@ struct Provider: AppIntentTimelineProvider {
 
     // MARK: Helper - Load specific habit data
     private func loadHabit(for id: String) async -> HabitDisplayInfo? {
-        guard !id.isEmpty, id != Provider.noHabitDisplayInfo.id else { return nil }
-        guard let allHabits = await loadAllHabits() else { return nil }
-        return allHabits.first { $0.id == id }
+        guard let data = defaults?.data(forKey: "WidgetHabits") else { return nil }
+        
+        do {
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            let habits = try decoder.decode([HabitDisplayInfo].self, from: data)
+            return habits.first { $0.id == id }
+        } catch {
+            print("Error decoding widget data: \(error)")
+            return nil
+        }
     }
 
     // MARK: Helper - Load all habits array
     private func loadAllHabits() async -> [HabitDisplayInfo]? {
-        // CHANGE: Use optional chaining `defaults?.data(...)`
-        guard let data = defaults?.data(forKey: "WidgetHabits") else {
-            // No habit data found in UserDefaults for the specified key, or defaults itself is nil.
-            return nil
-        }
+        guard let data = defaults?.data(forKey: "WidgetHabits") else { return nil }
+        
         do {
-            let habits = try JSONDecoder().decode([HabitDisplayInfo].self, from: data)
-            return habits // Return potentially empty array
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            return try decoder.decode([HabitDisplayInfo].self, from: data)
         } catch {
-            // Error decoding habit data from UserDefaults.
+            print("Error decoding widget data: \(error)")
             return nil
         }
     }

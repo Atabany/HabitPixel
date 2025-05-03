@@ -387,34 +387,34 @@ extension HabitEntity {
     }
     
     static func updateWidgetHabits(_ habits: [HabitEntity]) {
-        let calendar = Calendar.current
-        let displayHabits = habits.map { habit -> HabitDisplayInfo in
-            let entries = habit.entries
-            let completedDates = Set(entries.map { calendar.startOfDay(for: $0.timestamp) })
-            let startDate: Date
-            let endDate: Date
-            if let first = entries.min(by: { $0.timestamp < $1.timestamp })?.timestamp,
-                let last = entries.max(by: { $0.timestamp < $1.timestamp })?.timestamp {
-                startDate = calendar.startOfDay(for: first)
-                endDate = calendar.startOfDay(for: last)
-            } else {
-                startDate = calendar.startOfDay(for: habit.createdAt)
-                endDate = calendar.startOfDay(for: Date())
-            }
-            return HabitDisplayInfo(
-                id: "\(habit.persistentModelID)",
-                title: habit.title,
-                iconName: habit.iconName,
-                color: habit.color,
-                completedDates: completedDates,
-                startDate: startDate,
-                endDate: endDate
+        let defaults = UserDefaults(suiteName: "group.com.atabany.HabitPixel")
+        let displayInfos = habits.map {
+            HabitDisplayInfo(
+                id: "\($0.persistentModelID)",
+                title: $0.title,
+                iconName: $0.iconName,
+                color: $0.color,
+                completedDates: Set($0.entries.map { Calendar.current.startOfDay(for: $0.timestamp) }),
+                startDate: $0.dateRange?.first ?? $0.createdAt,
+                endDate: $0.dateRange?.last ?? $0.createdAt
             )
         }
-
-        if let defaults = UserDefaults(suiteName: "group.com.atabany.HabitPixel"),
-            let data = try? JSONEncoder().encode(displayHabits) {
-            defaults.set(data, forKey: "WidgetHabits")
+        
+        do {
+            let encoder = JSONEncoder()
+            encoder.dateEncodingStrategy = .iso8601
+            let data = try encoder.encode(displayInfos)
+            defaults?.set(data, forKey: "WidgetHabits")
+            
+            // Force immediate widget update
+            WidgetCenter.shared.reloadAllTimelines()
+            
+            // Schedule another update in 5 seconds to ensure changes are reflected
+            DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                WidgetCenter.shared.reloadAllTimelines()
+            }
+        } catch {
+            print("Error encoding widget data: \(error)")
         }
     }
 }

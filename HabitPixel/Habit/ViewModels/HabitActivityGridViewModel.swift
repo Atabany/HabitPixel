@@ -52,7 +52,14 @@ final class HabitActivityGridViewModel: ObservableObject {
                 self.calculateStreak()
             }
             self.isUpdating = false
+            
+            // Trigger immediate widget update
             Self.syncWidget(self.allHabits)
+            
+            // Schedule another update in 2 seconds to ensure changes are reflected
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                Self.syncWidget(self.allHabits)
+            }
         }
     }
 
