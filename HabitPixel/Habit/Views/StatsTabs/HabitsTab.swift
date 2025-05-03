@@ -107,6 +107,7 @@ struct CategoryButton: View {
             .clipShape(Capsule())
             .overlay(
                 Capsule()
+                    .inset(by: 1)
                     .stroke(isSelected ? themeColors.primary : themeColors.onBackground.opacity(0.2), lineWidth: 1)
             )
         }

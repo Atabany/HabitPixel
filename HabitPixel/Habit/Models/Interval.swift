@@ -55,15 +55,3 @@ enum Interval: String, CaseIterable, Identifiable {
         }
     }
 }
-
-enum Day: String, CaseIterable, Identifiable {
-    case mon = "Mon"
-    case tue = "Tue"
-    case wed = "Wed"
-    case thu = "Thu"
-    case fri = "Fri"
-    case sat = "Sat"
-    case sun = "Sun"
-    
-    var id: String { rawValue }
-}

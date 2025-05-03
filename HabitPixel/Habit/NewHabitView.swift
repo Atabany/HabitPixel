@@ -21,6 +21,7 @@ struct NewHabitView: View {
     @State private var category: String
     @State private var selectedIcon: String
     @State private var selectedColor: Color
+    @State private var reminderTime: Date = Date()
 
     @State private var showingValidationAlert = false
     @State private var validationMessage = ""
@@ -40,6 +41,7 @@ struct NewHabitView: View {
         _category = State(initialValue: editingHabit?.category ?? "None")
         _selectedIcon = State(initialValue: editingHabit?.iconName ?? "waveform.path.ecg")
         _selectedColor = State(initialValue: editingHabit?.color ?? .red)
+        _reminderTime = State(initialValue: editingHabit?.reminderTime ?? Date())
 
         if let days = editingHabit?.reminderDays {
             _selectedDays = State(initialValue: Set(days.compactMap { Day(rawValue: $0) }))
@@ -87,6 +89,7 @@ struct NewHabitView: View {
                     selectedInterval: $selectedInterval,
                     completionsPerInterval: $completionsPerInterval,
                     selectedDays: $selectedDays,
+                    reminderTime: $reminderTime,
                     category: $category,
                     categories: categories,
                     themeColors: themeColors
@@ -216,6 +219,13 @@ struct NewHabitView: View {
             existingHabit.category = category
             existingHabit.color = selectedColor
             existingHabit.reminderDays = selectedDays.map { $0.rawValue }.sorted()
+            if !selectedDays.isEmpty {
+                existingHabit.reminderTime = reminderTime
+                NotificationManager.shared.scheduleNotifications(for: existingHabit)
+            } else {
+                existingHabit.reminderTime = nil
+                NotificationManager.shared.removeNotifications(for: existingHabit)
+            }
         } else {
             let habit = HabitEntity(
                 title: name,
@@ -226,11 +236,15 @@ struct NewHabitView: View {
                 color: selectedColor,
                 category: category,
                 createdAt: Date(),
-                reminderTime: nil,
+                reminderTime: selectedDays.isEmpty ? nil : reminderTime,
                 reminderDays: selectedDays.map { $0.rawValue }.sorted(),
                 isArchived: false
             )
             modelContext.insert(habit)
+
+            if !selectedDays.isEmpty {
+                NotificationManager.shared.scheduleNotifications(for: habit)
+            }
         }
 
         try? modelContext.save()
@@ -243,8 +257,8 @@ struct NewHabitView: View {
         @Binding var selectedInterval: Interval
         @Binding var completionsPerInterval: Int
         @Binding var selectedDays: Set<Day>
+        @Binding var reminderTime: Date
         @Binding var category: String
-
         let categories: [(String, String)]
         let themeColors: ColorScheme
 
@@ -267,7 +281,7 @@ struct NewHabitView: View {
                     }
                 }
 
-                NavigationLink(destination: ReminderView(selectedDays: $selectedDays)) {
+                NavigationLink(destination: ReminderView(selectedDays: $selectedDays, reminderTime: $reminderTime)) {
                     HStack {
                         Text("Reminder")
                         Spacer()
