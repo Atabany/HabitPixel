@@ -10,7 +10,6 @@ import SwiftUI
 struct StreakGoalView: View {
     @Binding var selectedInterval: Interval
     @Binding var completionsPerInterval: Int
-    let themeColors = AppColors.currentColorScheme
     
     private let intervals = [
         (interval: Interval.daily, description: "Daily goal"),
@@ -23,7 +22,7 @@ struct StreakGoalView: View {
 
     var body: some View {
         Form {
-            Section(header: Text("Goal Interval").foregroundColor(themeColors.onBackground)) {
+            Section(header: Text("Goal Interval").foregroundColor(Color.theme.onBackground)) {
                 ForEach(intervals, id: \.interval) { item in
                     Button(action: {
                         selectedInterval = item.interval
@@ -38,37 +37,36 @@ struct StreakGoalView: View {
                                     .font(.headline)
                                 Text(item.description)
                                     .font(.caption)
-                                    .foregroundColor(themeColors.caption)
+                                    .foregroundColor(Color.theme.caption)
                             }
                             
                             Spacer()
                             
                             if selectedInterval == item.interval {
                                 Image(systemName: "checkmark.circle.fill")
-                                    .foregroundColor(themeColors.primary)
+                                    .foregroundColor(Color.theme.primary)
                             }
                         }
                     }
-                    .foregroundColor(themeColors.onBackground)
+                    .foregroundColor(Color.theme.onBackground)
                 }
             }
             
             if selectedInterval != .daily {
-                Section(header: Text("Completions Goal").foregroundColor(themeColors.onBackground)) {
+                Section(header: Text("Completions Goal").foregroundColor(Color.theme.onBackground)) {
                     VStack(alignment: .leading, spacing: 10) {
                         Text("How many times do you want to complete this habit \(selectedInterval.rawValue)?")
                             .font(.subheadline)
-                            .foregroundColor(themeColors.caption)
+                            .foregroundColor(Color.theme.caption)
                         
                         CompletionsControl(value: $completionsPerInterval,
                                          min: minCompletionsPerInterval,
-                                         max: maxCompletionsPerInterval,
-                                         themeColors: themeColors)
+                                         max: maxCompletionsPerInterval)
                             .padding(.vertical, 8)
                         
                         Text(getGoalDescription())
                             .font(.subheadline)
-                            .foregroundColor(themeColors.caption)
+                            .foregroundColor(Color.theme.caption)
                     }
                     .padding(.vertical, 8)
                 }
@@ -76,11 +74,11 @@ struct StreakGoalView: View {
                 Section {
                     Text("Daily habits are completed once per day")
                         .font(.subheadline)
-                        .foregroundColor(themeColors.caption)
+                        .foregroundColor(Color.theme.caption)
                 }
             }
         }
-        .background(themeColors.background)
+        .background(Color.theme.background)
         .navigationTitle("Streak Goal")
     }
     
@@ -100,14 +98,13 @@ struct CompletionsControl: View {
     @Binding var value: Int
     let min: Int
     let max: Int
-    let themeColors: ColorScheme
     
     var body: some View {
         HStack(spacing: 20) {
             Button(action: decrement) {
                 Image(systemName: "minus.circle.fill")
                     .font(.system(size: 32))
-                    .foregroundColor(value > min ? themeColors.primary : themeColors.caption)
+                    .foregroundColor(value > min ? Color.theme.primary : Color.theme.caption)
             }
             .buttonStyle(PlainButtonStyle())
             .disabled(value <= min)
@@ -115,12 +112,12 @@ struct CompletionsControl: View {
             Text("\(value)")
                 .font(.system(size: 32, weight: .medium))
                 .frame(minWidth: 60)
-                .foregroundColor(themeColors.onBackground)
+                .foregroundColor(Color.theme.onBackground)
             
             Button(action: increment) {
                 Image(systemName: "plus.circle.fill")
                     .font(.system(size: 32))
-                    .foregroundColor(value < max ? themeColors.primary : themeColors.caption)
+                    .foregroundColor(value < max ? Color.theme.primary : Color.theme.caption)
             }
             .buttonStyle(PlainButtonStyle())
             .disabled(value >= max)

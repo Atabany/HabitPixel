@@ -59,28 +59,31 @@ struct NewHabitView: View {
         "pencil", "envelope", "calendar", "mic", "camera"
     ]
 
-    private let quickColors: [Color] = [
-        Color(hex: 0xFF6B6B), // Red
-        Color(hex: 0xFF922B), // Orange
-        Color(hex: 0xFABD2F), // Yellow
-        Color(hex: 0xB8BB26), // Yellow-Green
-        Color(hex: 0x8EC07C), // Green
-        Color(hex: 0x83A598), // Blue-Green
-        Color(hex: 0x458588), // Blue
-        Color(hex: 0x689D6A), // Sea Green
-        Color(hex: 0xD3869B), // Pink
-        Color(hex: 0xB16286), // Purple
-        Color(hex: 0xD65D0E), // Dark Orange
-        Color(hex: 0xCC241D), // Dark Red
-        Color(hex: 0x98971A), // Dark Yellow-Green
-        Color(hex: 0x458588)  // Dark Blue
-    ]
-
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 12), count: 7)
 
-    var body: some View {
-        let themeColors = AppColors.currentColorScheme
+    private var quickColorSelection: [ColorVariant] {
+        let firstRow = [
+            Color.variants[0],  // Red
+            Color.variants[7],  // Pink
+            Color.variants[14], // Orange
+            Color.variants[21], // Yellow
+            Color.variants[28], // Green
+            Color.variants[35], // Teal
+        ]
+        
+        let secondRow = [
+            Color.variants[42], // Cyan
+            Color.variants[44], // Blue
+            Color.variants[46], // Indigo
+            Color.variants[48], // Purple
+            Color.variants[33], // Dark Green
+            Color.variants[19], // Gold
+        ]
+        
+        return firstRow + secondRow
+    }
 
+    var body: some View {
         NavigationStack {
             Form {
                 HabitDetailsFormSection(
@@ -91,25 +94,30 @@ struct NewHabitView: View {
                     selectedDays: $selectedDays,
                     reminderTime: $reminderTime,
                     category: $category,
-                    categories: categories,
-                    themeColors: themeColors
+                    categories: categories
                 )
 
                 Section {
                     HStack {
-                        Text("Icon").foregroundColor(themeColors.onBackground)
+                        Text("Icon").foregroundColor(Color.theme.onBackground)
                         Spacer()
                         Image(systemName: selectedIcon)
-                            .font(.title)
+                            .font(.system(size: 18))
                             .frame(width: 44, height: 44)
                             .background(selectedColor)
                             .foregroundColor(.white)
                             .clipShape(Circle())
+                            .overlay(Circle().stroke(Color.theme.onBackground.opacity(0.5), lineWidth: 1))
+                            .padding(8)
                     }
 
                     LazyVGrid(columns: columns, spacing: 16) {
                         ForEach(quickIcons, id: \.self) { icon in
-                            IconButton(icon: icon, selectedIcon: selectedIcon, isHighlighted: highlightedIcon && selectedIcon == icon) {
+                            IconButton(
+                                icon: icon,
+                                selectedIcon: selectedIcon,
+                                isHighlighted: highlightedIcon && selectedIcon == icon
+                            ) {
                                 selectedIcon = icon
                                 withAnimation(.spring()) { highlightedIcon = true }
                                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
@@ -125,10 +133,13 @@ struct NewHabitView: View {
                                 }
                             }) { EmptyView() }.opacity(0)
                             ZStack {
-                                Circle().fill(themeColors.surface)
+                                Circle().fill(Color.theme.surface)
                                     .frame(width: 44, height: 44)
-                                    .overlay(Circle().stroke(themeColors.primary, lineWidth: 1))
-                                Text("More").font(.caption2).fontWeight(.medium).foregroundColor(themeColors.primary)
+                                    .overlay(Circle().stroke(Color.theme.primary, lineWidth: 1))
+                                Text("More")
+                                    .font(.caption2)
+                                    .fontWeight(.medium)
+                                    .foregroundColor(Color.theme.primary)
                             }
                         }
                     }
@@ -137,18 +148,22 @@ struct NewHabitView: View {
 
                 Section {
                     HStack {
-                        Text("Color").foregroundColor(themeColors.onBackground)
+                        Text("Color").foregroundColor(Color.theme.onBackground)
                         Spacer()
                         Circle()
                             .fill(selectedColor)
                             .frame(width: 44, height: 44)
-                            .overlay(Circle().stroke(themeColors.onBackground.opacity(0.5), lineWidth: 1))
+                            .overlay(Circle().stroke(Color.theme.onBackground.opacity(0.5), lineWidth: 1))
                     }
 
                     LazyVGrid(columns: columns, spacing: 16) {
-                        ForEach(quickColors, id: \.self) { color in
-                            ColorButton(color: color, selectedColor: selectedColor, isHighlighted: highlightedColor && selectedColor == color) {
-                                selectedColor = color
+                        ForEach(quickColorSelection, id: \.light) { variant in
+                            ColorButton(
+                                color: variant.adaptive,
+                                selectedColor: selectedColor,
+                                isHighlighted: highlightedColor && selectedColor == variant.adaptive
+                            ) {
+                                selectedColor = variant.adaptive
                                 withAnimation(.spring()) { highlightedColor = true }
                                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                                     withAnimation { highlightedColor = false }
@@ -163,10 +178,13 @@ struct NewHabitView: View {
                                 }
                             }) { EmptyView() }.opacity(0)
                             ZStack {
-                                Circle().fill(themeColors.surface)
+                                Circle().fill(Color.theme.surface)
                                     .frame(width: 44, height: 44)
-                                    .overlay(Circle().stroke(themeColors.primary, lineWidth: 1))
-                                Text("More").font(.caption2).fontWeight(.medium).foregroundColor(themeColors.primary)
+                                    .overlay(Circle().stroke(Color.theme.primary, lineWidth: 1))
+                                Text("More")
+                                    .font(.caption2)
+                                    .fontWeight(.medium)
+                                    .foregroundColor(Color.theme.primary)
                             }
                         }
                     }
@@ -181,20 +199,29 @@ struct NewHabitView: View {
                 }
                 .frame(maxWidth: .infinity)
                 .padding()
-                .background(themeColors.primary)
-                .foregroundColor(themeColors.onPrimary)
+                .background(Color.theme.primary)
+                .foregroundColor(.white)
                 .clipShape(RoundedRectangle(cornerRadius: 10))
             }
             .scrollContentBackground(.hidden)
-            .background(themeColors.background)
+            .background(Color.theme.background)
             .navigationTitle(editingHabit == nil ? "New Habit" : "Edit Habit")
-            .navigationBarItems(leading: Button(action: { dismiss() }) {
-                Image(systemName: "xmark").foregroundColor(themeColors.onBackground)
-            }, trailing: Button("Save") {
-                if validateForm() { saveHabit() }
-            }.foregroundColor(themeColors.primary))
+            .navigationBarItems(
+                leading: Button(action: { dismiss() }) {
+                    Image(systemName: "xmark")
+                        .foregroundColor(Color.theme.onBackground)
+                },
+                trailing: Button("Save") {
+                    if validateForm() { saveHabit() }
+                }
+                .foregroundColor(Color.theme.primary)
+            )
             .alert(isPresented: $showingValidationAlert) {
-                Alert(title: Text("Validation Error"), message: Text(validationMessage), dismissButton: .default(Text("OK")))
+                Alert(
+                    title: Text("Validation Error"),
+                    message: Text(validationMessage),
+                    dismissButton: .default(Text("OK"))
+                )
             }
         }
     }
@@ -260,14 +287,13 @@ struct NewHabitView: View {
         @Binding var reminderTime: Date
         @Binding var category: String
         let categories: [(String, String)]
-        let themeColors: ColorScheme
 
         var body: some View {
-            Section(header: Text("Name").foregroundColor(themeColors.onBackground)) {
+            Section(header: Text("Name").foregroundColor(Color.theme.onBackground)) {
                 TextField("Name", text: $name)
             }
 
-            Section(header: Text("Description").foregroundColor(themeColors.onBackground)) {
+            Section(header: Text("Description").foregroundColor(Color.theme.onBackground)) {
                 TextField("Description", text: $description)
             }
 
@@ -277,7 +303,7 @@ struct NewHabitView: View {
                         Text("Streak Goal")
                         Spacer()
                         Text("\(completionsPerInterval) \(selectedInterval.rawValue.lowercased())")
-                            .foregroundColor(themeColors.caption)
+                            .foregroundColor(Color.theme.caption)
                     }
                 }
 
@@ -286,7 +312,7 @@ struct NewHabitView: View {
                         Text("Reminder")
                         Spacer()
                         Text(selectedDays.isEmpty ? "None" : selectedDays.map { $0.rawValue }.sorted().joined(separator: ", "))
-                            .foregroundColor(themeColors.caption)
+                            .foregroundColor(Color.theme.caption)
                     }
                 }
 
@@ -300,17 +326,17 @@ struct NewHabitView: View {
                                     Image(systemName: categoryItem.1)
                                         .font(.title2)
                                         .frame(width: 44, height: 44)
-                                        .background(category == categoryItem.0 ? themeColors.primary : themeColors.surface)
-                                        .foregroundColor(category == categoryItem.0 ? themeColors.onPrimary : themeColors.onBackground)
+                                        .background(category == categoryItem.0 ? Color.theme.primary : Color.theme.surface)
+                                        .foregroundColor(category == categoryItem.0 ? .white : Color.theme.onBackground)
                                         .clipShape(Circle())
                                         .overlay(
                                             Circle()
-                                                .stroke(themeColors.primary, lineWidth: category == categoryItem.0 ? 0 : 1)
+                                                .stroke(Color.theme.primary, lineWidth: category == categoryItem.0 ? 0 : 1)
                                         )
 
                                     Text(categoryItem.0)
                                         .font(.caption)
-                                        .foregroundColor(category == categoryItem.0 ? themeColors.primary : themeColors.onBackground)
+                                        .foregroundColor(category == categoryItem.0 ? Color.theme.primary : Color.theme.onBackground)
                                 }
                             }
                         }
@@ -329,19 +355,18 @@ struct IconButton: View {
     let selectedIcon: String
     let isHighlighted: Bool
     let action: () -> Void
-    let themeColors = AppColors.currentColorScheme
 
     var body: some View {
         Button(action: action) {
             Image(systemName: icon)
                 .font(.title2)
                 .frame(width: 44, height: 44)
-                .background(selectedIcon == icon ? themeColors.primary : themeColors.surface)
-                .foregroundColor(selectedIcon == icon ? themeColors.onPrimary : themeColors.onBackground)
+                .background(selectedIcon == icon ? Color.theme.primary : Color.theme.surface)
+                .foregroundColor(selectedIcon == icon ? .white : Color.theme.onBackground)
                 .clipShape(Circle())
                 .overlay(
                     Circle()
-                        .stroke(themeColors.primary, lineWidth: selectedIcon == icon ? 2 : 1)
+                        .stroke(Color.theme.primary, lineWidth: selectedIcon == icon ? 2 : 1)
                 )
                 .scaleEffect(isHighlighted ? 1.2 : 1.0)
         }
@@ -356,8 +381,7 @@ struct ColorButton: View {
     let selectedColor: Color
     let isHighlighted: Bool
     let action: () -> Void
-    let themeColors = AppColors.currentColorScheme
-
+    
     var body: some View {
         Button(action: action) {
             Circle()
@@ -365,7 +389,7 @@ struct ColorButton: View {
                 .frame(width: 44, height: 44)
                 .overlay(
                     Circle()
-                        .stroke(selectedColor == color ? themeColors.primary : Color.clear, lineWidth: 3)
+                        .stroke(selectedColor == color ? Color.theme.primary : Color.theme.onBackground.opacity(0.5), lineWidth: selectedColor == color ? 2 : 1)
                 )
                 .scaleEffect(isHighlighted ? 1.2 : 1.0)
         }

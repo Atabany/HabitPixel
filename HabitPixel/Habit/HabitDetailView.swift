@@ -20,11 +20,10 @@ struct HabitDetailView: View {
     }
     
     var body: some View {
-        VStack(spacing: 16) {
-            let colors = AppColors.currentColorScheme
-            
+        Group {
             ZStack {
-                Color.black.opacity(0.3)
+                Rectangle()
+                    .fill(.ultraThinMaterial)
                     .ignoresSafeArea()
                     .onTapGesture { dismiss() }
                 
@@ -59,7 +58,7 @@ struct HabitDetailView: View {
                         VStack {
                             Text(habit.frequency)
                                 .font(.subheadline)
-                                .foregroundColor(colors.onBackground)
+                                .foregroundColor(Color.theme.onBackground)
                             HStack(spacing: 4) {
                                 Text("\(habit.getCompletionsInCurrentInterval())")
                                 Text("/")
@@ -72,7 +71,7 @@ struct HabitDetailView: View {
                         VStack {
                             Text("Streak")
                                 .font(.subheadline)
-                                .foregroundColor(colors.onBackground)
+                                .foregroundColor(Color.theme.onBackground)
                             Text("\(habit.currentStreak(from: Date()))")
                                 .font(.title2)
                                 .fontWeight(.bold)
@@ -82,7 +81,7 @@ struct HabitDetailView: View {
                         VStack {
                             Text("Remaining")
                                 .font(.subheadline)
-                                .foregroundColor(colors.onBackground)
+                                .foregroundColor(Color.theme.onBackground)
                             Text("\(habit.getRemainingForCurrentInterval())")
                                 .font(.title2)
                                 .fontWeight(.bold)
@@ -129,13 +128,23 @@ struct HabitDetailView: View {
                         }
                         .foregroundStyle(.red)
                     }
-                    .foregroundColor(colors.onBackground)
+                    .foregroundColor(Color.theme.onBackground)
                 }
                 .padding()
-                .background(colors.background)
+                .background(Color.theme.background)
                 .clipShape(RoundedRectangle(cornerRadius: 20))
                 .shadow(radius: 10)
                 .padding(.horizontal, 30)
+            }
+        }
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                Button(action: { dismiss() }) {
+                    Image(systemName: "xmark")
+                        .font(.title2)
+                        .foregroundColor(.secondary)
+                }
+                .accessibilityLabel("Close")
             }
         }
         .sheet(isPresented: $showingCalendar) {
@@ -161,5 +170,8 @@ struct HabitDetailView: View {
         } message: {
             Text("Are you sure you want to delete this habit? This action cannot be undone.")
         }
+        .presentationBackground(.clear)
+        .presentationCornerRadius(0)
+        .interactiveDismissDisabled()
     }
 }

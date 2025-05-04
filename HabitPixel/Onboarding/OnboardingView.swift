@@ -7,17 +7,15 @@
 
 import SwiftUI
 
-struct PrimaryButtonStyle: ViewModifier {
-    let colors: ColorScheme
-    
+struct PrimaryButtonStyle: ViewModifier {    
     func body(content: Content) -> some View {
         content
             .font(.title2)
             .fontWeight(.bold)
-            .foregroundColor(colors.onPrimary)
+            .foregroundColor(.white)
             .frame(maxWidth: .infinity)
             .padding()
-            .background(colors.primary)
+            .background(Color.theme.primary)
             .cornerRadius(10)
             .padding(.horizontal)
     }
@@ -44,119 +42,97 @@ struct OnboardingView: View {
     @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
-        let colors = AppColors.currentColorScheme
-        
         ZStack {
-            colors.background.edgesIgnoringSafeArea(.all)
+            Color.theme.background.edgesIgnoringSafeArea(.all)
             VStack {
-                welcomeHeader(colors: colors)
+                welcomeHeader()
                 
                 Spacer().frame(height: 30)
                 
-                featureList(colors: colors)
+                featureList()
                 
-                continueButton(colors: colors)
+                continueButton()
                     .padding(.bottom, 20)
             }
         }
     }
     
-    private func welcomeHeader(colors: ColorScheme) -> some View {
+    private func welcomeHeader() -> some View {
         VStack {
             Text("Welcome to")
                 .font(.largeTitle)
                 .fontWeight(.bold)
-                .foregroundColor(colors.onBackground)
+                .foregroundColor(Color.theme.onBackground)
             Text("HabitPixel")
                 .font(.largeTitle)
                 .fontWeight(.bold)
-                .foregroundColor(colors.primary)
+                .foregroundColor(Color.theme.primary)
         }
     }
     
-    private func featureList(colors: ColorScheme) -> some View {
+    private func featureList() -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 Group {
                     FeatureRow(
                         icon: "square.grid.2x2.fill",
-                        color: AppColors.lightPrimary,
+                        color: Color.theme.primary,
                         title: "Build new habits",
-                        description: "Create your habits and track your progress",
-                        titleColor: colors.onBackground,
-                        colors: colors
+                        description: "Create your habits and track your progress"
                     )
                     FeatureRow(
                         icon: "checkmark.circle.fill",
                         color: .green,
                         title: "Check it off",
-                        description: "Mark when you completed your habits",
-                        titleColor: colors.onBackground,
-                        colors: colors
+                        description: "Mark when you completed your habits"
                     )
                     FeatureRow(
                         icon: "square.grid.3x3.fill",
                         color: .blue,
                         title: "See the big picture",
-                        description: "Get your completions visualized in a cool tile grid",
-                        titleColor: colors.onBackground,
-                        colors: colors
+                        description: "Get your completions visualized in a cool tile grid"
                     )
                     FeatureRow(
                         icon: "flame.fill",
                         color: .red,
                         title: "Get motivation from streaks",
-                        description: "The streak count displays how consistent you are",
-                        titleColor: colors.primary,
-                        colors: colors
+                        description: "The streak count displays how consistent you are"
                     )
                     FeatureRow(
                         icon: "clock.fill",
                         color: .teal,
                         title: "Don't miss a completion",
-                        description: "Get notifications at the specified times",
-                        titleColor: colors.onBackground,
-                        colors: colors
+                        description: "Get notifications at the specified times"
                     )
                     FeatureRow(
                         icon: "gearshape.fill",
                         color: .green,
                         title: "Build your dashboard",
-                        description: "Choose from different colors, icons and themes",
-                        titleColor: .yellow,
-                        colors: colors
+                        description: "Choose from different colors, icons and themes"
                     )
                     FeatureRow(
                         icon: "calendar",
                         color: .blue,
                         title: "Search through your history",
-                        description: "See past completions and edit them",
-                        titleColor: colors.onBackground,
-                        colors: colors
+                        description: "See past completions and edit them"
                     )
                     FeatureRow(
                         icon: "square.and.arrow.up",
                         color: .green,
                         title: "Share your progress",
-                        description: "Generate a cool image to share your consistency",
-                        titleColor: colors.onBackground,
-                        colors: colors
+                        description: "Generate a cool image to share your consistency"
                     )
                     FeatureRow(
                         icon: "square.grid.2x2",
-                        color: AppColors.lightPrimary,
+                        color: Color.theme.primary,
                         title: "Home Screen Widgets",
-                        description: "Show your favorite habits on your home screen",
-                        titleColor: colors.primary,
-                        colors: colors
+                        description: "Show your favorite habits on your home screen"
                     )
                     FeatureRow(
                         icon: "lock.fill",
-                        color: AppColors.lightPrimary,
+                        color: Color.theme.primary,
                         title: "Preserve your privacy",
-                        description: "Your data will never leave your phone",
-                        titleColor: colors.primary,
-                        colors: colors
+                        description: "Your data will never leave your phone"
                     )
                 }
                 .padding(.horizontal)
@@ -164,12 +140,12 @@ struct OnboardingView: View {
         }
     }
     
-    private func continueButton(colors: ColorScheme) -> some View {
+    private func continueButton() -> some View {
         Button(action: {
             hasSeenOnboarding = true
         }) {
             Text("Continue")
-                .modifier(PrimaryButtonStyle(colors: colors))
+                .modifier(PrimaryButtonStyle())
         }
     }
 }
@@ -179,8 +155,6 @@ struct FeatureRow: View {
     let color: Color
     let title: String
     let description: String
-    let titleColor: Color
-    let colors: ColorScheme
     
     var body: some View {
         HStack(alignment: .top, spacing: 15) {
@@ -193,28 +167,11 @@ struct FeatureRow: View {
             VStack(alignment: .leading, spacing: 5) {
                 Text(title)
                     .font(.headline)
-                    .foregroundColor(titleColor)
+                    .foregroundColor(Color.theme.onBackground)
                 Text(description)
                     .font(.subheadline)
-                    .foregroundColor(colors.caption)
+                    .foregroundColor(Color.theme.caption)
             }
         }
-    }
-}
-
-struct OnboardingView_Previews: PreviewProvider {
-    static var previews: some View {
-        Group {
-            OnboardingView(hasSeenOnboarding: .constant(false))
-                .preferredColorScheme(.dark)
-            OnboardingView(hasSeenOnboarding: .constant(false))
-                .preferredColorScheme(.light)
-        }
-    }
-}
-
-struct OnboardingContainerView_Previews: PreviewProvider {
-    static var previews: some View {
-        OnboardingContainerView()
     }
 }

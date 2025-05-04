@@ -11,7 +11,6 @@ import SwiftData
 struct CategoryFilterView: View {
     @Binding var selectedCategory: Category
     let activeCategories: [Category]
-    let themeColors = AppColors.currentColorScheme
     
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
@@ -38,19 +37,70 @@ struct CategoryFilterView: View {
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 6)
-            .background(selectedCategory.id == category.id ? themeColors.primary.opacity(0.1) : themeColors.surface)
-            .foregroundColor(selectedCategory.id == category.id ? themeColors.primary : themeColors.onBackground)
+            .background(selectedCategory.id == category.id ? Color.theme.primary.opacity(0.1) : Color.theme.surface)
+            .foregroundColor(selectedCategory.id == category.id ? Color.theme.primary : Color.theme.onBackground)
             .clipShape(Capsule())
         }
     }
 }
 
-// Add HabitCardView
+struct ShareHabitCardView: View {
+    let habit: HabitEntity
+    
+    var body: some View {
+        VStack(spacing: 12) {
+            // Habit header
+            HStack(spacing: 12) {
+                Image(systemName: habit.iconName)
+                    .font(.title2)
+                    .frame(width: 40, height: 40)
+                    .background(habit.color.opacity(0.1))
+                    .foregroundColor(habit.color)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(habit.title)
+                        .font(.headline)
+                        .foregroundColor(Color.theme.onBackground)
+                    if !habit.habitDescription.isEmpty {
+                        Text(habit.habitDescription)
+                            .font(.caption)
+                            .foregroundColor(Color.theme.caption)
+                    }
+                }
+                
+                Spacer()
+            }
+            
+            // Activity grid
+            HabitActivityGrid(habit: habit)
+            
+            HStack {
+                Text("\(habit.goal) / \(habit.frequency)")
+                    .font(.caption)
+                    .foregroundColor(Color.theme.caption)
+                
+                Spacer()
+                
+                Text("HabitKit")
+                    .font(.caption)
+                    .foregroundColor(Color.theme.caption)
+            }
+        }
+        .padding(16)
+        .background(Color.theme.surface)
+        .cornerRadius(16)
+        .padding(.horizontal)
+    }
+}
+
 struct HabitCardView: View {
     let habit: HabitEntity
     let onComplete: () -> Void
     let isCompleted: Bool
     @State private var showingDetail = false
+    @State private var showingShareView = false
+    @Environment(\.displayScale) private var displayScale
     
     var body: some View {
         Button(action: { showingDetail = true }) {
@@ -67,31 +117,41 @@ struct HabitCardView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(habit.title)
                             .font(.headline)
+                            .foregroundColor(Color.theme.onBackground)
                         if !habit.habitDescription.isEmpty {
                             Text(habit.habitDescription)
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(Color.theme.caption)
                         }
                     }
                     
                     Spacer()
                     
-                    Button(action: onComplete) {
-                        Circle()
-                            .fill(isCompleted ? habit.color : habit.color.opacity(0.1))
-                            .frame(width: 40, height: 40)
-                            .overlay(
-                                Image(systemName: "checkmark")
-                                    .foregroundColor(isCompleted ? .white : habit.color)
-                            )
+                    HStack(spacing: 12) {
+                        Button(action: {
+                            showingShareView = true
+                        }) {
+                            Image(systemName: "square.and.arrow.up")
+                                .foregroundColor(Color.theme.onBackground)
+                        }
+                        
+                        Button(action: onComplete) {
+                            Circle()
+                                .fill(isCompleted ? habit.color : habit.color.opacity(0.1))
+                                .frame(width: 40, height: 40)
+                                .overlay(
+                                    Image(systemName: "checkmark")
+                                        .foregroundColor(isCompleted ? .white : habit.color)
+                                )
+                        }
                     }
                 }
                 
                 // Activity grid
-                HabitActivityGrid(habit: habit)
+                HabitActivityGrid(habit: habit, overrideColor: nil)
             }
             .padding(16)
-            .background(Color(.systemBackground))
+            .background(Color.theme.surface)
             .cornerRadius(16)
             .padding(.horizontal)
         }
@@ -100,7 +160,39 @@ struct HabitCardView: View {
             HabitDetailView(habit: habit)
                 .presentationBackground(.clear)
         }
+        .sheet(isPresented: $showingShareView) {
+            ShareHabitView(habit: habit)
+        }
     }
+    
+    private func renderShareImage() -> UIImage {
+        let renderer = ImageRenderer(content: ShareHabitCardView(habit: habit))
+        renderer.scale = displayScale
+        
+        // Configure renderer props
+        renderer.proposedSize = ProposedViewSize(width: UIScreen.main.bounds.width - 32, height: nil)
+        
+        // Create the image
+        return renderer.uiImage ?? UIImage()
+    }
+    
+    private func shareHabit() {
+        showingShareView = true
+    }
+}
+
+struct ShareSheet: UIViewControllerRepresentable {
+    let items: [Any]
+    
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        let controller = UIActivityViewController(
+            activityItems: items,
+            applicationActivities: nil
+        )
+        return controller
+    }
+    
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }
 
 // Main view
@@ -116,14 +208,20 @@ struct HabitKitView: View {
     @State private var showingNewHabit = false
     @State private var showingSettings = false
     @State private var showingStats = false
+    @State private var showingProUpgrade = false
     @State private var selectedCategory: Category = .all
     
+    private var isProUser: Bool {
+        // TODO: Replace with actual premium status check
+        false
+    }
+    
+    private var canAddMoreHabits: Bool {
+        isProUser || habits.count < 3
+    }
+    
     var activeCategories: [Category] {
-        // Get unique category names from habits
         let activeNames = Set(habits.map { $0.category })
-        
-        // Always include "All" category and then filter Category.categories
-        // to only include those that have habits
         return [Category.all] + Category.categories
             .filter { category in
                 activeNames.contains(category.name)
@@ -138,8 +236,6 @@ struct HabitKitView: View {
     }
     
     var body: some View {
-        let colors = AppColors.currentColorScheme
-        
         NavigationStack {
             ScrollView {
                 VStack(spacing: 16) {
@@ -154,11 +250,11 @@ struct HabitKitView: View {
                         VStack(spacing: 12) {
                             Image(systemName: "square.grid.2x2")
                                 .font(.largeTitle)
-                                .foregroundColor(colors.caption)
+                                .foregroundColor(Color.theme.caption)
                             
                             Text(habits.isEmpty ? "No habits yet" : "No habits in this category")
                                 .font(.headline)
-                                .foregroundColor(colors.caption)
+                                .foregroundColor(Color.theme.caption)
                             
                             Button(action: { showingNewHabit = true }) {
                                 Text("Add Habit")
@@ -166,8 +262,8 @@ struct HabitKitView: View {
                                     .fontWeight(.medium)
                                     .padding(.horizontal, 16)
                                     .padding(.vertical, 8)
-                                    .background(colors.primary)
-                                    .foregroundColor(colors.onPrimary)
+                                    .background(Color.theme.primary)
+                                    .foregroundColor(.white)
                                     .clipShape(Capsule())
                             }
                         }
@@ -184,34 +280,40 @@ struct HabitKitView: View {
                     }
                 }
             }
-            .background(colors.background)
+            .background(Color.theme.background)
             .navigationTitle("HabitKit")
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarItems(
                 leading: Button(action: { showingSettings = true }) {
                     Image(systemName: "gearshape.fill")
-                        .foregroundColor(colors.onBackground)
+                        .foregroundColor(Color.theme.onBackground)
                 },
                 trailing: HStack(spacing: 16) {
-                    Button(action: {}) {
+                    Button(action: { showingProUpgrade = true }) {
                         Text("PRO")
                             .font(.subheadline)
                             .fontWeight(.medium)
                             .padding(.horizontal, 10)
                             .padding(.vertical, 4)
-                            .background(colors.surface)
+                            .background(Color.theme.surface)
                             .clipShape(RoundedRectangle(cornerRadius: 8))
-                            .foregroundColor(colors.onBackground)
+                            .foregroundColor(Color.theme.onBackground)
                     }
                     
-                    Button(action: { showingStats = true }) {  
+                    Button(action: { showingStats = true }) {
                         Image(systemName: "chart.bar.fill")
-                            .foregroundColor(colors.onBackground)
+                            .foregroundColor(Color.theme.onBackground)
                     }
                     
-                    Button(action: { showingNewHabit = true }) {
+                    Button(action: {
+                        if canAddMoreHabits {
+                            showingNewHabit = true
+                        } else {
+                            showingProUpgrade = true
+                        }
+                    }) {
                         Image(systemName: "plus")
-                            .foregroundColor(colors.onBackground)
+                            .foregroundColor(Color.theme.onBackground)
                     }
                 }
             )
@@ -224,8 +326,10 @@ struct HabitKitView: View {
             .sheet(isPresented: $showingStats) {
                 GlobalStatsView()
             }
+            .sheet(isPresented: $showingProUpgrade) {
+                UnlockProView()
+            }
             .onChange(of: habits) { _, _ in
-                // If the selected category no longer has habits, switch to "All"
                 if selectedCategory != .all && !activeCategories.contains(where: { $0.id == selectedCategory.id }) {
                     selectedCategory = .all
                 }

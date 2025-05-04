@@ -4,12 +4,14 @@ import WidgetKit
 
 struct HabitActivityGrid: View {
     let habit: HabitEntity
+    var overrideColor: Color?
     @Environment(\.modelContext) private var modelContext
     @Query private var allHabits: [HabitEntity]
     @StateObject private var viewModel: HabitActivityGridViewModel
     
-    init(habit: HabitEntity) {
+    init(habit: HabitEntity, overrideColor: Color? = nil) {
         self.habit = habit
+        self.overrideColor = overrideColor
         _allHabits = Query()
         _viewModel = StateObject(wrappedValue: HabitActivityGridViewModel(habit: habit, allHabits: []))
     }
@@ -24,9 +26,9 @@ struct HabitActivityGrid: View {
                                 WeekView(
                                     weekIndex: weekIndex,
                                     data: data,
-                                    viewModel: viewModel
+                                    viewModel: viewModel,
+                                    overrideColor: overrideColor
                                 )
-                                .id(weekIndex)
                             }
                         }
                         .padding(.vertical, 8)
@@ -68,6 +70,7 @@ private struct WeekView: View {
     let weekIndex: Int
     let data: GridData
     let viewModel: HabitActivityGridViewModel
+    let overrideColor: Color?
     
     var body: some View {
         VStack(spacing: viewModel.spacing) {
@@ -76,7 +79,8 @@ private struct WeekView: View {
                 DayCell(
                     date: date,
                     data: data,
-                    viewModel: viewModel
+                    viewModel: viewModel,
+                    overrideColor: overrideColor
                 )
             }
         }
@@ -88,13 +92,15 @@ private struct DayCell: View {
     let date: Date
     let data: GridData
     let viewModel: HabitActivityGridViewModel
+    let overrideColor: Color?
     
     var body: some View {
         let startOfDay = viewModel.calendar.startOfDay(for: date)
         let isCompleted = data.completedDates.contains(startOfDay)
+        let color = overrideColor ?? viewModel.habit.color
         
         RoundedRectangle(cornerRadius: 2)
-            .fill(viewModel.habit.color.opacity(viewModel.getCellOpacity(for: date, isCompleted: isCompleted)))
+            .fill(color.opacity(viewModel.getCellOpacity(for: date, isCompleted: isCompleted)))
             .frame(width: viewModel.cellSize, height: viewModel.cellSize)
             .contentShape(Rectangle())
     }

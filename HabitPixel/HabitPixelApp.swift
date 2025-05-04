@@ -107,7 +107,7 @@ struct HabitPixelApp: App {
 
     var body: some Scene {
         WindowGroup {
-            HabitKitView()
+            OnboardingContainerView()
                 .applyTheme(themeManager)
                 .environmentObject(themeManager)
                 // Observe changes in the main context to trigger widget sync

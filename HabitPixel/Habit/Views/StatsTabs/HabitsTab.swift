@@ -3,17 +3,15 @@ import SwiftUI
 struct HabitsTab: View {
     let habits: [HabitEntity]
     @Binding var selectedHabit: HabitEntity?
-    @Binding var showingHabitDetail: Bool
     @State private var searchText = ""
     @State private var selectedCategory: Category = .all
-    let themeColors = AppColors.currentColorScheme
     
     var filteredHabits: [HabitEntity] {
         habits
             .filter { habit in
-                let matchesSearch = searchText.isEmpty || 
+                let matchesSearch = searchText.isEmpty ||
                     habit.title.localizedCaseInsensitiveContains(searchText)
-                let matchesCategory = selectedCategory == .all || 
+                let matchesCategory = selectedCategory == .all ||
                     habit.category == selectedCategory.name
                 return matchesSearch && matchesCategory
             }
@@ -30,18 +28,18 @@ struct HabitsTab: View {
             // Search bar
             HStack {
                 Image(systemName: "magnifyingglass")
-                    .foregroundColor(.secondary)
+                    .foregroundColor(Color.theme.caption)
                 TextField("Search habits", text: $searchText)
                     .textFieldStyle(PlainTextFieldStyle())
                 if !searchText.isEmpty {
                     Button(action: { searchText = "" }) {
                         Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(.secondary)
+                            .foregroundColor(Color.theme.caption)
                     }
                 }
             }
             .padding(10)
-            .background(themeColors.surface)
+            .background(Color.theme.surface)
             .cornerRadius(10)
             .padding(.horizontal)
             
@@ -75,7 +73,6 @@ struct HabitsTab: View {
                                 habit: habit,
                                 onTap: {
                                     selectedHabit = habit
-                                    showingHabitDetail = true
                                 }
                             )
                             .padding(.horizontal)
@@ -91,7 +88,6 @@ struct CategoryButton: View {
     let category: Category
     let isSelected: Bool
     let action: () -> Void
-    let themeColors = AppColors.currentColorScheme
     
     var body: some View {
         Button(action: action) {
@@ -102,13 +98,13 @@ struct CategoryButton: View {
             .font(.subheadline)
             .padding(.horizontal, 12)
             .padding(.vertical, 6)
-            .background(isSelected ? themeColors.primary.opacity(0.1) : Color.clear)
-            .foregroundColor(isSelected ? themeColors.primary : themeColors.onBackground)
+            .background(isSelected ? Color.theme.primary.opacity(0.1) : Color.clear)
+            .foregroundColor(isSelected ? Color.theme.primary : Color.theme.onBackground)
             .clipShape(Capsule())
             .overlay(
                 Capsule()
                     .inset(by: 1)
-                    .stroke(isSelected ? themeColors.primary : themeColors.onBackground.opacity(0.2), lineWidth: 1)
+                    .stroke(isSelected ? Color.theme.primary : Color.theme.onBackground.opacity(0.2), lineWidth: 1)
             )
         }
     }
@@ -117,7 +113,6 @@ struct CategoryButton: View {
 struct HabitStatRow: View {
     let habit: HabitEntity
     let onTap: () -> Void
-    let themeColors = AppColors.currentColorScheme
     
     var body: some View {
         Button(action: onTap) {
@@ -132,13 +127,14 @@ struct HabitStatRow: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(habit.title)
                         .font(.headline)
+                        .foregroundColor(Color.theme.onBackground)
                     
                     HStack {
                         Label("\(habit.currentStreak())", systemImage: "flame.fill")
                             .foregroundColor(.orange)
                         
                         Text("•")
-                            .foregroundColor(.secondary)
+                            .foregroundColor(Color.theme.caption)
                         
                         Label("\(habit.entries.count)", systemImage: "checkmark.circle.fill")
                             .foregroundColor(habit.color)
@@ -149,10 +145,10 @@ struct HabitStatRow: View {
                 Spacer()
                 
                 Image(systemName: "chevron.right")
-                    .foregroundColor(.secondary)
+                    .foregroundColor(Color.theme.caption)
             }
             .padding()
-            .background(themeColors.surface)
+            .background(Color.theme.surface)
             .cornerRadius(12)
         }
         .buttonStyle(PlainButtonStyle())

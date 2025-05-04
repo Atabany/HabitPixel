@@ -4,7 +4,6 @@ import SwiftData
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
-    let colors = AppColors.currentColorScheme
     
     var body: some View {
         NavigationStack {
@@ -26,7 +25,7 @@ struct SettingsView: View {
                                     .font(.headline)
                                 Text("Unlimited habits, import/export data,...")
                                     .font(.caption)
-                                    .foregroundColor(.secondary)
+                                    .foregroundColor(Color.theme.caption)
                             }
                         }
                     }
@@ -34,9 +33,6 @@ struct SettingsView: View {
                 
                 // App Settings Section
                 Section(header: Text("App")) {
-                    NavigationLink(destination: Text("General Settings")) {
-                        SettingsRowView(icon: "gearshape.fill", title: "General", color: .pink)
-                    }
                     NavigationLink(destination: ThemeSettingsView()) {
                         SettingsRowView(icon: "paintbrush.fill", title: "Theme", color: .orange)
                     }
@@ -73,7 +69,7 @@ struct SettingsView: View {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button(action: { dismiss() }) {
                         Image(systemName: "xmark")
-                            .foregroundColor(colors.onBackground)
+                            .foregroundColor(Color.theme.onBackground)
                     }
                 }
             }
@@ -92,12 +88,7 @@ struct SettingsRowView: View {
                 .foregroundColor(color)
                 .frame(width: 24)
             Text(title)
+                .foregroundColor(Color.theme.onBackground)
         }
-    }
-}
-
-struct SettingsView_Previews: PreviewProvider {
-    static var previews: some View {
-        SettingsView()
     }
 }

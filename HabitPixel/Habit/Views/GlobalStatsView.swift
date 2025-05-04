@@ -8,11 +8,9 @@ struct GlobalStatsView: View {
         habit.isArchived == false
     }) private var habits: [HabitEntity]
     
-    let themeColors = AppColors.currentColorScheme
     @State private var selectedTimeFrame: TimeFrame = .week
     @State private var selectedTab: StatTab = .overview
     @State private var selectedHabit: HabitEntity?
-    @State private var showingHabitDetail = false
     @State private var animateCharts = false
     
     enum TimeFrame: String, CaseIterable {
@@ -25,6 +23,7 @@ struct GlobalStatsView: View {
     enum StatTab: String, CaseIterable {
         case overview = "Overview"
         case habits = "Habits"
+        case insights = "Insights"
     }
     
     var body: some View {
@@ -34,7 +33,6 @@ struct GlobalStatsView: View {
                 selectedTimeFrame: $selectedTimeFrame,
                 selectedTab: $selectedTab,
                 selectedHabit: $selectedHabit,
-                showingHabitDetail: $showingHabitDetail,
                 animateCharts: $animateCharts
             )
             .navigationTitle("Statistics")
@@ -43,14 +41,16 @@ struct GlobalStatsView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: { dismiss() }) {
                         Image(systemName: "xmark")
-                            .foregroundColor(themeColors.onBackground)
+                            .foregroundColor(Color.theme.onBackground)
                     }
                 }
             }
-            .sheet(isPresented: $showingHabitDetail) {
-                if let habit = selectedHabit {
+            .sheet(item: $selectedHabit) { habit in
+                NavigationStack {
                     HabitDetailView(habit: habit)
                 }
+                .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
             }
         }
     }
@@ -61,9 +61,7 @@ private struct StatsContent: View {
     @Binding var selectedTimeFrame: GlobalStatsView.TimeFrame
     @Binding var selectedTab: GlobalStatsView.StatTab
     @Binding var selectedHabit: HabitEntity?
-    @Binding var showingHabitDetail: Bool
     @Binding var animateCharts: Bool
-    let themeColors = AppColors.currentColorScheme
     
     var body: some View {
         VStack(spacing: 0) {
@@ -72,7 +70,8 @@ private struct StatsContent: View {
             if selectedTab != .habits {
                 TimeFrameSelector(
                     selectedTimeFrame: $selectedTimeFrame,
-                    animateCharts: $animateCharts
+                    animateCharts: $animateCharts,
+                    selectedTab: $selectedTab
                 )
             }
             
@@ -81,7 +80,6 @@ private struct StatsContent: View {
                 habits: habits,
                 timeFrame: selectedTimeFrame,
                 selectedHabit: $selectedHabit,
-                showingHabitDetail: $showingHabitDetail,
                 animate: animateCharts
             )
         }
@@ -105,18 +103,21 @@ private struct TabBarView: View {
             .padding(.horizontal)
         }
         .padding(.vertical, 8)
-        .background(AppColors.currentColorScheme.surface)
+        .background(Color.theme.surface)
     }
 }
 
 private struct TimeFrameSelector: View {
     @Binding var selectedTimeFrame: GlobalStatsView.TimeFrame
     @Binding var animateCharts: Bool
+    @Binding var selectedTab: GlobalStatsView.StatTab
     
     var body: some View {
+        let availableTimeFrames: [GlobalStatsView.TimeFrame] =
+            selectedTab == .insights ? GlobalStatsView.TimeFrame.allCases.filter { $0 != .all } : GlobalStatsView.TimeFrame.allCases
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 12) {
-                ForEach(GlobalStatsView.TimeFrame.allCases, id: \.self) { timeFrame in
+                ForEach(availableTimeFrames, id: \.self) { timeFrame in
                     TimeFrameButton(
                         title: timeFrame.rawValue,
                         isSelected: selectedTimeFrame == timeFrame,
@@ -144,7 +145,6 @@ private struct TabContent: View {
     let habits: [HabitEntity]
     let timeFrame: GlobalStatsView.TimeFrame
     @Binding var selectedHabit: HabitEntity?
-    @Binding var showingHabitDetail: Bool
     let animate: Bool
     
     var body: some View {
@@ -160,8 +160,12 @@ private struct TabContent: View {
                 case .habits:
                     HabitsTab(
                         habits: habits,
-                        selectedHabit: $selectedHabit,
-                        showingHabitDetail: $showingHabitDetail
+                        selectedHabit: $selectedHabit
+                    )
+                case .insights:
+                    InsightsTab(
+                        habits: habits,
+                        timeFrame: timeFrame
                     )
                 }
             }
@@ -174,7 +178,6 @@ struct TabButton: View {
     let title: String
     let isSelected: Bool
     let action: () -> Void
-    let themeColors = AppColors.currentColorScheme
     
     var body: some View {
         Button(action: action) {
@@ -182,13 +185,13 @@ struct TabButton: View {
                 .font(.headline)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 8)
-                .foregroundColor(isSelected ? .white : themeColors.onBackground)
-                .background(isSelected ? themeColors.primary : .clear)
+                .foregroundColor(isSelected ? .white : Color.theme.onBackground)
+                .background(isSelected ? Color.theme.primary : .clear)
                 .clipShape(Capsule())
                 .overlay(
                     Capsule()
                         .inset(by: 0.5)
-                        .stroke(isSelected ? .clear : themeColors.onBackground.opacity(0.2), lineWidth: 1)
+                        .stroke(isSelected ? .clear : Color.theme.onBackground.opacity(0.2), lineWidth: 1)
                 )
         }
     }
@@ -198,7 +201,6 @@ struct TimeFrameButton: View {
     let title: String
     let isSelected: Bool
     let action: () -> Void
-    let themeColors = AppColors.currentColorScheme
     
     var body: some View {
         Button(action: action) {
@@ -206,13 +208,13 @@ struct TimeFrameButton: View {
                 .font(.subheadline)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 8)
-                .foregroundColor(isSelected ? themeColors.primary : themeColors.onBackground)
-                .background(isSelected ? themeColors.primary.opacity(0.1) : .clear)
+                .foregroundColor(isSelected ? Color.theme.primary : Color.theme.onBackground)
+                .background(isSelected ? Color.theme.primary.opacity(0.1) : .clear)
                 .clipShape(Capsule())
                 .overlay(
                     Capsule()
                         .inset(by: 0.5)
-                        .stroke(isSelected ? themeColors.primary : themeColors.onBackground.opacity(0.2), lineWidth: 1)
+                        .stroke(isSelected ? Color.theme.primary : Color.theme.onBackground.opacity(0.2), lineWidth: 1)
                 )
         }
     }
@@ -233,17 +235,16 @@ struct HabitPerformanceRow: View {
             Spacer()
             
             Text("\(habit.entries.count)")
-                .foregroundColor(.secondary)
+                .foregroundColor(Color.theme.caption)
         }
         .padding()
-        .background(Color(.systemBackground))
+        .background(Color.theme.surface)
         .cornerRadius(10)
     }
 }
 
 struct TimeActivityChart: View {
     let distribution: [Date: Int]
-    let themeColors = AppColors.currentColorScheme
     
     var body: some View {
         GeometryReader { geometry in
@@ -268,7 +269,7 @@ struct TimeActivityChart: View {
             }
             .stroke(
                 LinearGradient(
-                    colors: [themeColors.primary, themeColors.primary.opacity(0.5)],
+                    colors: [Color.theme.primary, Color.theme.primary.opacity(0.5)],
                     startPoint: .top,
                     endPoint: .bottom
                 ),
@@ -295,7 +296,6 @@ struct TimeActivityChart: View {
 
 struct CompletionTrendChart: View {
     let completions: [Date: Int]
-    let themeColors = AppColors.currentColorScheme
     
     var body: some View {
         GeometryReader { geometry in
@@ -320,7 +320,7 @@ struct CompletionTrendChart: View {
             }
             .stroke(
                 LinearGradient(
-                    colors: [themeColors.primary, themeColors.primary.opacity(0.5)],
+                    colors: [Color.theme.primary, Color.theme.primary.opacity(0.5)],
                     startPoint: .leading,
                     endPoint: .trailing
                 ),

@@ -14,7 +14,6 @@ struct ReminderView: View {
     @Binding var reminderTime: Date
     @State private var showingPermissionAlert = false
     @State private var isNotificationEnabled = false
-    let colors = AppColors.currentColorScheme
     
     var body: some View {
         NavigationStack {
@@ -29,14 +28,14 @@ struct ReminderView: View {
                         }
                     }
                     .padding(.horizontal)
-                    .tint(colors.primary)
+                    .tint(Color.theme.primary)
                 
                 if isNotificationEnabled {
                     VStack(alignment: .leading, spacing: 16) {
                         Text("SELECT DAYS")
                             .font(.subheadline)
                             .fontWeight(.medium)
-                            .foregroundColor(colors.caption)
+                            .foregroundColor(Color.theme.caption)
                             .padding(.horizontal)
                         
                         HStack(spacing: 8) {
@@ -55,7 +54,7 @@ struct ReminderView: View {
                         Button(action: toggleAllDays) {
                             Text(selectedDays.count == Day.allCases.count ? "Clear All" : "Select All")
                                 .font(.subheadline)
-                                .foregroundColor(colors.primary)
+                                .foregroundColor(Color.theme.primary)
                                 .padding(.horizontal)
                         }
                     }
@@ -65,7 +64,7 @@ struct ReminderView: View {
                             Text("REMINDER TIME")
                                 .font(.subheadline)
                                 .fontWeight(.medium)
-                                .foregroundColor(colors.caption)
+                                .foregroundColor(Color.theme.caption)
                                 .padding(.horizontal)
                             
                             DatePicker("", selection: $reminderTime, displayedComponents: .hourAndMinute)
@@ -128,7 +127,6 @@ struct DayButton: View {
     let day: Day
     let isSelected: Bool
     let action: () -> Void
-    let colors = AppColors.currentColorScheme
     
     var body: some View {
         Button(action: action) {
@@ -136,12 +134,12 @@ struct DayButton: View {
                 .font(.headline)
                 .fontWeight(.semibold)
                 .frame(width: 44, height: 44)
-                .background(isSelected ? colors.primary : colors.surface)
-                .foregroundColor(isSelected ? colors.onPrimary : colors.onBackground)
+                .background(isSelected ? Color.theme.primary : Color.theme.surface)
+                .foregroundColor(isSelected ? .white : Color.theme.onBackground)
                 .clipShape(Circle())
                 .overlay(
                     Circle()
-                        .stroke(colors.primary, lineWidth: isSelected ? 0 : 1)
+                        .stroke(Color.theme.primary, lineWidth: isSelected ? 0 : 1)
                 )
         }
         .buttonStyle(PlainButtonStyle())

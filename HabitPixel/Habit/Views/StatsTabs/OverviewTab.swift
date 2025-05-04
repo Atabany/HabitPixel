@@ -57,7 +57,7 @@ struct QuickStatView: View {
                     .foregroundColor(color)
                 Text(title)
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(Color.theme.caption)
             }
             
             Text(value)
@@ -66,7 +66,7 @@ struct QuickStatView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
-        .background(Color(.systemBackground))
+        .background(Color.theme.surface)
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .overlay(
             RoundedRectangle(cornerRadius: 12)
@@ -101,7 +101,6 @@ struct OverviewTab: View {
     let habits: [HabitEntity]
     let timeFrame: GlobalStatsView.TimeFrame
     let animate: Bool
-    let themeColors = AppColors.currentColorScheme
     @State private var selectedHabitId: String?
     
     var selectedHabit: HabitEntity? {
@@ -124,7 +123,7 @@ struct OverviewTab: View {
                     HabitSelectorButton(
                         title: "All Habits",
                         icon: "square.grid.2x2",
-                        color: themeColors.primary,
+                        color: Color.theme.primary,
                         isSelected: selectedHabitId == nil,
                         action: { selectedHabitId = nil }
                     )
@@ -148,7 +147,7 @@ struct OverviewTab: View {
                     title: "Total Completions",
                     value: getTotalCompletions(),
                     icon: "checkmark.circle.fill",
-                    color: selectedHabit?.color ?? themeColors.primary
+                    color: selectedHabit?.color ?? Color.theme.primary
                 )
                 
                 QuickStatView(
@@ -188,21 +187,21 @@ struct OverviewTab: View {
                 DailyActivityChart(
                     habits: displayHabits,
                     timeFrame: timeFrame,
-                    color: selectedHabit?.color ?? themeColors.primary
+                    color: selectedHabit?.color ?? Color.theme.primary
                 )
                 .frame(height: 200)
             }
             .padding(.horizontal)
             
             if selectedHabit == nil {
-                // Category distribution (only show for all habits)
+                // Category distribution
                 StatCard(title: "Category Distribution", icon: "folder.fill") {
                     CategoryDistributionChart(habits: habits, timeFrame: timeFrame)
                         .frame(height: 200)
                 }
                 .padding(.horizontal)
             } else {
-                // Completion heatmap (only show for individual habits)
+                // Completion heatmap
                 StatCard(title: "Completion Pattern", icon: "calendar") {
                     CompletionHeatMap(habit: selectedHabit!, timeFrame: timeFrame)
                         .frame(height: 200)
@@ -288,18 +287,19 @@ struct StatCard<Content: View>: View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
                 Image(systemName: icon)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(Color.theme.caption)
                 Text(title)
                     .font(.headline)
+                    .foregroundColor(Color.theme.onBackground)
             }
             content
         }
         .padding()
-        .background(Color(.systemBackground))
+        .background(Color.theme.surface)
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+                .stroke(Color.theme.border, lineWidth: 1)
         )
         .shadow(color: Color.black.opacity(0.05), radius: 3, x: 0, y: 2)
     }
@@ -327,7 +327,6 @@ struct DailyActivityChart: View {
     let habits: [HabitEntity]
     let timeFrame: GlobalStatsView.TimeFrame
     let color: Color
-    let themeColors = AppColors.currentColorScheme
     
     var body: some View {
         let data = calculateDailyActivity()
@@ -350,6 +349,7 @@ struct DailyActivityChart: View {
                     AxisValueLabel {
                         Text(formatHour(hour))
                             .font(.caption)
+                            .foregroundColor(Color.theme.caption)
                     }
                 }
             }
@@ -388,7 +388,6 @@ struct DailyActivityChart: View {
 struct CategoryDistributionChart: View {
     let habits: [HabitEntity]
     let timeFrame: GlobalStatsView.TimeFrame
-    let themeColors = AppColors.currentColorScheme
     
     var body: some View {
         let data = calculateCategoryDistribution()

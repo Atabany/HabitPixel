@@ -42,6 +42,17 @@ final class HabitEntity {
         }
     }
     
+    var adaptiveColor: Color {
+        // Find matching color variant
+        if let variant = Color.variants.first(where: {
+            UIColor($0.light).cgColor.components?.prefix(3) == UIColor(color).cgColor.components?.prefix(3) ||
+            UIColor($0.dark).cgColor.components?.prefix(3) == UIColor(color).cgColor.components?.prefix(3)
+        }) {
+            return variant.adaptive
+        }
+        return color
+    }
+    
     // Optimized caching system
     @Transient private var completionCache: CompletionCache?
     

@@ -31,7 +31,7 @@ struct ThemeSettingsView: View {
                         Spacer()
                         if themeManager.currentColorScheme == (mode == .dark ? .dark : mode == .light ? .light : nil) {
                             Image(systemName: "checkmark.circle.fill")
-                                .foregroundColor(.purple)
+                                .foregroundColor(Color.theme.primary)
                         }
                     }
                     .contentShape(Rectangle())
