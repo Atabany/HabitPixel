@@ -9,6 +9,7 @@ struct HabitDetailView: View {
     @State private var showingEdit = false
     @State private var showingDeleteAlert = false
     @State private var showingArchiveAlert = false
+    @State private var showingShareSheet = false
     
     private func archiveHabit() {
         withAnimation {
@@ -38,8 +39,8 @@ struct HabitDetailView: View {
                         
                         VStack(alignment: .leading, spacing: 4) {
                             Text(habit.title)
-                            .font(.title2)
-                            .fontWeight(.bold)
+                                .font(.title2)
+                                .fontWeight(.bold)
                             if !habit.habitDescription.isEmpty {
                                 Text(habit.habitDescription)
                                     .font(.subheadline)
@@ -48,6 +49,20 @@ struct HabitDetailView: View {
                         }
                         
                         Spacer()
+                        
+                        HStack(spacing: 12) {
+                            Button(action: {
+                                showingShareSheet = true
+                            }) {
+                                Image(systemName: "square.and.arrow.up")
+                                    .foregroundColor(Color.theme.onBackground)
+                            }
+                            
+                            Button(action: { showingEdit = true }) {
+                                Image(systemName: "square.and.pencil")
+                                    .foregroundColor(habit.color)
+                            }
+                        }
                     }
                     .padding(.top)
                     
@@ -100,15 +115,6 @@ struct HabitDetailView: View {
                             }
                         }
                         
-                        Button(action: { showingEdit = true }) {
-                            VStack(spacing: 4) {
-                                Image(systemName: "square.and.pencil")
-                                    .font(.title3)
-                                Text("Edit")
-                                    .font(.caption)
-                            }
-                        }
-                        
                         Button(action: { showingArchiveAlert = true }) {
                             VStack(spacing: 4) {
                                 Image(systemName: "archivebox")
@@ -152,6 +158,9 @@ struct HabitDetailView: View {
         }
         .sheet(isPresented: $showingEdit) {
             NewHabitView(editingHabit: habit)
+        }
+        .sheet(isPresented: $showingShareSheet) {
+            ShareHabitView(habit: habit)
         }
         .alert("Archive Habit", isPresented: $showingArchiveAlert) {
             Button("Cancel", role: .cancel) { }

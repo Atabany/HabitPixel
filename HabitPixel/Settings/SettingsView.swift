@@ -4,13 +4,14 @@ import SwiftData
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
+    @State private var showingProView = false
     
     var body: some View {
         NavigationStack {
             List {
                 // Pro Subscription Section
                 Section(header: Text("")) {
-                    NavigationLink(destination: Text("HabitKit Pro")) {
+                    Button(action: { showingProView = true }) {
                         HStack {
                             Image(systemName: "square.grid.2x2.fill")
                                 .foregroundStyle(
@@ -72,6 +73,9 @@ struct SettingsView: View {
                             .foregroundColor(Color.theme.onBackground)
                     }
                 }
+            }
+            .sheet(isPresented: $showingProView) {
+                UnlockProView()
             }
         }
     }
