@@ -59,7 +59,9 @@ struct HabitActivityGrid: View {
         .onAppear {
             if !allHabits.isEmpty {
                 viewModel.allHabits = allHabits
-                HabitEntity.updateWidgetHabits(allHabits)
+                Task {
+                    await HabitEntity.updateWidgetHabits(allHabits)
+                }
             }
         }
     }

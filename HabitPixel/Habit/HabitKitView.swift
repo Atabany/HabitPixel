@@ -8,6 +8,28 @@
 import SwiftUI
 import SwiftData
 
+enum DisplayMode: String, CaseIterable {
+    case cards, rows
+
+    var iconName: String {
+        switch self {
+        case .cards:
+            return "square.grid.2x2.fill"
+        case .rows:
+            return "list.bullet.rectangle.fill"
+        }
+    }
+    
+    var title: String {
+        switch self {
+        case .cards:
+            return "Grid View"
+        case .rows:
+            return "List View"
+        }
+    }
+}
+
 struct CategoryFilterView: View {
     @Binding var selectedCategory: Category
     let activeCategories: [Category]
@@ -210,10 +232,11 @@ struct HabitKitView: View {
     @State private var showingStats = false
     @State private var showingProUpgrade = false
     @State private var selectedCategory: Category = .all
+    @State private var displayMode: DisplayMode = .rows
     
     private var isProUser: Bool {
         // TODO: Replace with actual premium status check
-        false
+        true
     }
     
     private var canAddMoreHabits: Bool {
@@ -234,16 +257,36 @@ struct HabitKitView: View {
         }
         return habits.filter { $0.category == selectedCategory.name }
     }
+    private let columns = [
+        GridItem(.flexible(), spacing: 12),
+        GridItem(.flexible(), spacing: 12)
+    ]
     
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 16) {
+                VStack(spacing: 20) {
                     if !habits.isEmpty {
-                        CategoryFilterView(
-                            selectedCategory: $selectedCategory,
-                            activeCategories: activeCategories
-                        )
+                        HStack {
+                            CategoryFilterView(
+                                selectedCategory: $selectedCategory,
+                                activeCategories: activeCategories
+                            )
+                            
+                            Button(action: {
+                                withAnimation(.easeInOut) {
+                                    displayMode = displayMode == .cards ? .rows : .cards
+                                }
+                            }) {
+                                Image(systemName: displayMode.iconName)
+                                    .foregroundColor(Color.theme.onBackground)
+                                    .frame(width: 32, height: 32)
+                                    .background(Color.theme.surface)
+                                    .clipShape(Circle())
+                            }
+                            .padding(.trailing, 16)
+                        }
+                        .padding(.top, 8)
                     }
                     
                     if filteredHabits.isEmpty {
@@ -270,12 +313,28 @@ struct HabitKitView: View {
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .padding(.vertical, 40)
                     } else {
-                        ForEach(filteredHabits) { habit in
-                            HabitCardView(
-                                habit: habit,
-                                onComplete: { toggleTodayCompletion(for: habit) },
-                                isCompleted: isTodayCompleted(for: habit)
-                            )
+                        switch displayMode {
+                        case .cards:
+                            LazyVGrid(columns: columns, spacing: 12) {
+                                ForEach(filteredHabits) { habit in
+                                    SimpleHabitCardView(
+                                        habit: habit,
+                                        onComplete: { toggleTodayCompletion(for: habit) },
+                                        isCompleted: isTodayCompleted(for: habit)
+                                    )
+                                }
+                            }
+                            .padding(.horizontal, 12)
+                        case .rows:
+                            LazyVStack(spacing: 12) {
+                                ForEach(filteredHabits) { habit in
+                                    HabitCardView(
+                                        habit: habit,
+                                        onComplete: { toggleTodayCompletion(for: habit) },
+                                        isCompleted: isTodayCompleted(for: habit)
+                                    )
+                                }
+                            }
                         }
                     }
                 }

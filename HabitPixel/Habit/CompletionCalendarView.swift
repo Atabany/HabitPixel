@@ -109,16 +109,14 @@ struct CompletionCalendarView: View {
         
         guard targetDate <= today else { return }
         
-        withAnimation(.easeInOut(duration: 0.05)) {
-            HabitEntity.toggleCompletion(habit: habit, date: date, context: modelContext, allHabits: allHabits)
-            
-            // Update completedDates Set to reflect the new state
-            if completedDates.contains(targetDate) {
-                completedDates.remove(targetDate)
-            } else {
-                completedDates.insert(targetDate)
-            }
+        // Optimistic UI update
+        if completedDates.contains(targetDate) {
+            completedDates.remove(targetDate)
+        } else {
+            completedDates.insert(targetDate)
         }
+        
+        HabitEntity.toggleCompletion(habit: habit, date: date, context: modelContext, allHabits: allHabits)
     }
     
     private func monthYearString(from date: Date) -> String {
@@ -196,29 +194,36 @@ struct CalendarDayButton: View {
     let onTap: () -> Void
     
     private let calendar = Calendar.current
-    private let size: CGFloat = 36
-    
+    private let dayNumberSize: CGFloat = 20 
+    private let dotSize: CGFloat = 6
+    private let totalCellHeight: CGFloat = 36
+
+
     private var isFutureDate: Bool {
         let today = calendar.startOfDay(for: Date())
-        return date > today
+        return calendar.startOfDay(for: date) > today
     }
     
     var body: some View {
         Button(action: onTap) {
-            Text("\(calendar.component(.day, from: date))")
-                .font(.system(size: 15))
-                .fontWeight(isToday ? .medium : .regular)
-                .frame(maxWidth: .infinity)
-                .frame(height: size)
-                .foregroundColor(foregroundColor)
-                .background(
-                    Circle()
-                        .fill(isCompleted ? color : Color.clear)
-                        .overlay(
-                            Circle()
-                                .strokeBorder(isToday && !isCompleted ? color : Color.clear, lineWidth: 1)
-                        )
-                )
+            VStack(spacing: 2) {
+                Text("\(calendar.component(.day, from: date))")
+                    .font(.system(size: 15))
+                    .fontWeight(isToday ? .medium : .regular)
+                    .foregroundColor(foregroundColor)
+                    .frame(height: dayNumberSize)
+
+                Circle()
+                    .fill(isCompleted ? color : Color.clear)
+                    .frame(width: dotSize, height: dotSize)
+                    .animation(nil, value: isCompleted)
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: totalCellHeight)
+            .background(
+                Circle()
+                    .strokeBorder(isToday ? color : Color.clear, lineWidth: 1.5)
+            )
         }
         .buttonStyle(PlainButtonStyle())
         .disabled(isFutureDate)
@@ -227,10 +232,10 @@ struct CalendarDayButton: View {
     private var foregroundColor: Color {
         if isFutureDate {
             return Color.gray.opacity(0.3)
-        } else if isCompleted {
-            return .white
         } else if !isCurrentMonth {
             return Color.secondary.opacity(0.3)
+        } else if isToday {
+            return isCompleted ? .primary : color
         }
         return .primary
     }

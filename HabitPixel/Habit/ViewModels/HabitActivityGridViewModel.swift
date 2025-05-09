@@ -31,13 +31,15 @@ final class HabitActivityGridViewModel: ObservableObject {
         self.habit = habit
         self.allHabits = allHabits
         // Initial widget sync
-        Self.syncWidget(allHabits)
+        Task {
+            await Self.syncWidget(allHabits)
+        }
     }
     
     func loadInitialData() async {
         gridData = await calculateGridData()
         calculateStreak()
-        Self.syncWidget(allHabits)
+        await Self.syncWidget(allHabits)
     }
     
     func updateGridData() async {
@@ -52,21 +54,14 @@ final class HabitActivityGridViewModel: ObservableObject {
                 self.calculateStreak()
             }
             self.isUpdating = false
-            
-            // Trigger immediate widget update
-            Self.syncWidget(self.allHabits)
-            
-            // Schedule another update in 2 seconds to ensure changes are reflected
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                Self.syncWidget(self.allHabits)
-            }
         }
+        await Self.syncWidget(self.allHabits)
     }
 
     // Static helper to ensure consistent widget syncing
-    private static func syncWidget(_ habits: [HabitEntity]) {
-        HabitEntity.updateWidgetHabits(habits)
-        WidgetCenter.shared.reloadAllTimelines()
+    private static func syncWidget(_ habits: [HabitEntity]) async {
+        await HabitEntity.updateWidgetHabits(habits)
+        // Note: WidgetCenter.shared.reloadAllTimelines() is now handled within HabitEntity.updateWidgetHabits
     }
     
     func getDate(weekIndex: Int, dayIndex: Int, startDate: Date) -> Date {

@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import WidgetKit
 
 struct ReorderHabitsView: View {
     @Query(
@@ -29,14 +30,19 @@ struct ReorderHabitsView: View {
                     var updatedHabits = habits
                     updatedHabits.move(fromOffsets: from, toOffset: to)
                     
-                    // Update all habits with new timestamps for ordering
                     let now = Date()
                     for (index, habit) in updatedHabits.enumerated() {
-                        // Using minutes as offset to ensure proper ordering
                         habit.createdAt = now.addingTimeInterval(TimeInterval(index * 60))
                     }
                     
-                    try? modelContext.save()
+                    do {
+                        try modelContext.save()
+                        Task {
+                            await HabitEntity.updateWidgetHabits(updatedHabits)
+                        }
+                    } catch {
+                        print("Failed to save reordered habits: \(error)")
+                    }
                 }
             }
         }

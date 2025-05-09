@@ -18,7 +18,23 @@ final class HabitEntity {
     var colorBlue: Double
     var colorOpacity: Double
     var reminderTime: Date?
-    var reminderDays: [String]
+    private var _reminderDays: Data?
+    var reminderDays: [String] {
+        get {
+            if let data = _reminderDays,
+               let days = try? JSONDecoder().decode([String].self, from: data) {
+                return days
+            }
+            return []
+        }
+        set {
+            if let data = try? JSONEncoder().encode(newValue) {
+                _reminderDays = data
+            } else {
+                _reminderDays = nil // Ensure it's nil if encoding fails
+            }
+        }
+    }
     var isArchived: Bool
     var archivedDate: Date?
     @Relationship(deleteRule: .cascade) var entries: [EntryEntity] = []
@@ -171,7 +187,7 @@ final class HabitEntity {
         self.category = category
         self.createdAt = createdAt
         self.reminderTime = reminderTime
-        self.reminderDays = reminderDays
+        self._reminderDays = try? JSONEncoder().encode(reminderDays)
         self.isArchived = isArchived
         self.archivedDate = nil
         
@@ -313,37 +329,63 @@ extension HabitEntity {
         let calendar = Calendar.current
         let startOfDay = calendar.startOfDay(for: date)
         
-        // Reset cache to ensure fresh state
         habit.invalidateCache()
         habit.ensureCacheInitialized()
         
-        // Check entries directly instead of relying on cache first
         let existingEntries = habit.entries.filter { entry in
             calendar.isDate(calendar.startOfDay(for: entry.timestamp), inSameDayAs: startOfDay)
         }
         
         if !existingEntries.isEmpty {
-            // Remove all completions for this day
             for entry in existingEntries {
                 context.delete(entry)
             }
             habit.completionCache?.removeCompletion(startOfDay)
         } else {
-            // Add completion
             let entry = EntryEntity(timestamp: startOfDay, habit: habit)
             habit.entries.append(entry)
             habit.completionCache?.addCompletion(startOfDay)
         }
 
-        // Force save and ensure cache is updated
-        try? context.save()
+        do {
+            try context.save()
+        } catch {
+            print("Error saving context in toggleCompletion: \(error)")
+            habit.invalidateCache()
+            return
+        }
         
-        // Reset cache after save to ensure fresh state
-        habit.invalidateCache()
+        Task(priority: .background) {
+            await Self.updateWidgetHabits(allHabits)
+        }
+    }
+    
+    static func updateWidgetHabits(_ habits: [HabitEntity]) async {
+        let defaults = UserDefaults(suiteName: "group.com.atabany.HabitPixel")
+        let displayInfos = habits.map {
+            HabitDisplayInfo(
+                id: "\($0.persistentModelID)",
+                title: $0.title,
+                iconName: $0.iconName,
+                color: $0.color,
+                completedDates: Set($0.entries.map { Calendar.current.startOfDay(for: $0.timestamp) }),
+                startDate: $0.dateRange?.first ?? $0.createdAt,
+                endDate: $0.dateRange?.last ?? $0.createdAt
+            )
+        }
         
-        // Update widget
-        updateWidgetHabits(allHabits)
-        WidgetCenter.shared.reloadAllTimelines()
+        do {
+            let encoder = JSONEncoder()
+            encoder.dateEncodingStrategy = .iso8601
+            let data = try encoder.encode(displayInfos)
+            defaults?.set(data, forKey: "WidgetHabits")
+
+            await MainActor.run {
+                WidgetCenter.shared.reloadAllTimelines()
+            }
+        } catch {
+            print("Error encoding/saving widget data: \(error)")
+        }
     }
     
     static func isDateCompleted(habit: HabitEntity, date: Date) -> Bool {
@@ -395,37 +437,5 @@ extension HabitEntity {
     
     func invalidateCache() {
         completionCache = nil
-    }
-    
-    static func updateWidgetHabits(_ habits: [HabitEntity]) {
-        let defaults = UserDefaults(suiteName: "group.com.atabany.HabitPixel")
-        let displayInfos = habits.map {
-            HabitDisplayInfo(
-                id: "\($0.persistentModelID)",
-                title: $0.title,
-                iconName: $0.iconName,
-                color: $0.color,
-                completedDates: Set($0.entries.map { Calendar.current.startOfDay(for: $0.timestamp) }),
-                startDate: $0.dateRange?.first ?? $0.createdAt,
-                endDate: $0.dateRange?.last ?? $0.createdAt
-            )
-        }
-        
-        do {
-            let encoder = JSONEncoder()
-            encoder.dateEncodingStrategy = .iso8601
-            let data = try encoder.encode(displayInfos)
-            defaults?.set(data, forKey: "WidgetHabits")
-            
-            // Force immediate widget update
-            WidgetCenter.shared.reloadAllTimelines()
-            
-            // Schedule another update in 5 seconds to ensure changes are reflected
-            DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                WidgetCenter.shared.reloadAllTimelines()
-            }
-        } catch {
-            print("Error encoding widget data: \(error)")
-        }
     }
 }
