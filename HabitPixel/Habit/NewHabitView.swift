@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import UIKit
 
 struct NewHabitView: View {
     @Environment(\.dismiss) var dismiss
@@ -30,6 +31,10 @@ struct NewHabitView: View {
 
     @State private var highlightedIcon = false
     @State private var highlightedColor = false
+    
+    private let successHapticGenerator = UINotificationFeedbackGenerator()
+    private let lightHapticGenerator = UIImpactFeedbackGenerator(style: .light)
+
 
     init(editingHabit: HabitEntity? = nil) {
         self.editingHabit = editingHabit
@@ -46,6 +51,9 @@ struct NewHabitView: View {
         if let days = editingHabit?.reminderDays {
             _selectedDays = State(initialValue: Set(days.compactMap { Day(rawValue: $0) }))
         }
+        
+        successHapticGenerator.prepare()
+        lightHapticGenerator.prepare()
     }
 
     private var categories: [(String, String)] {
@@ -116,7 +124,8 @@ struct NewHabitView: View {
                             IconButton(
                                 icon: icon,
                                 selectedIcon: selectedIcon,
-                                isHighlighted: highlightedIcon && selectedIcon == icon
+                                isHighlighted: highlightedIcon && selectedIcon == icon,
+                                hapticGenerator: lightHapticGenerator
                             ) {
                                 selectedIcon = icon
                                 withAnimation(.spring()) { highlightedIcon = true }
@@ -161,7 +170,8 @@ struct NewHabitView: View {
                             ColorButton(
                                 color: variant.adaptive,
                                 selectedColor: selectedColor,
-                                isHighlighted: highlightedColor && selectedColor == variant.adaptive
+                                isHighlighted: highlightedColor && selectedColor == variant.adaptive,
+                                hapticGenerator: lightHapticGenerator
                             ) {
                                 selectedColor = variant.adaptive
                                 withAnimation(.spring()) { highlightedColor = true }
@@ -207,7 +217,11 @@ struct NewHabitView: View {
             .background(Color.theme.background)
             .navigationTitle(editingHabit == nil ? "New Habit" : "Edit Habit")
             .navigationBarItems(
-                leading: Button(action: { dismiss() }) {
+                leading: Button(action: {
+                    lightHapticGenerator.impactOccurred()
+                    dismiss()
+                    lightHapticGenerator.prepare()
+                }) {
                     Image(systemName: "xmark")
                         .foregroundColor(Color.theme.onBackground)
                 },
@@ -274,8 +288,16 @@ struct NewHabitView: View {
             }
         }
 
-        try? modelContext.save()
-        dismiss()
+        do {
+            try modelContext.save()
+            successHapticGenerator.notificationOccurred(.success)
+            successHapticGenerator.prepare()
+            dismiss()
+        } catch {
+            print("Error saving habit: \(error)")
+            successHapticGenerator.notificationOccurred(.error)
+            successHapticGenerator.prepare()
+        }
     }
 
     private struct HabitDetailsFormSection: View {
@@ -354,10 +376,15 @@ struct IconButton: View {
     let icon: String
     let selectedIcon: String
     let isHighlighted: Bool
+    let hapticGenerator: UIImpactFeedbackGenerator
     let action: () -> Void
 
     var body: some View {
-        Button(action: action) {
+        Button(action: {
+            hapticGenerator.impactOccurred()
+            action()
+            hapticGenerator.prepare()
+        }) {
             Image(systemName: icon)
                 .font(.title2)
                 .frame(width: 44, height: 44)
@@ -380,10 +407,15 @@ struct ColorButton: View {
     let color: Color
     let selectedColor: Color
     let isHighlighted: Bool
+    let hapticGenerator: UIImpactFeedbackGenerator
     let action: () -> Void
     
     var body: some View {
-        Button(action: action) {
+        Button(action: {
+            hapticGenerator.impactOccurred()
+            action()
+            hapticGenerator.prepare()
+        }) {
             Circle()
                 .fill(color)
                 .frame(width: 44, height: 44)

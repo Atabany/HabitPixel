@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import UIKit
 
 struct CompletionCalendarView: View {
     @Environment(\.dismiss) var dismiss
@@ -15,16 +16,17 @@ struct CompletionCalendarView: View {
     private let daysInWeek = 7
     private let weekRows = 6
     private let weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-    
+    private let hapticGenerator = UIImpactFeedbackGenerator(style: .medium)
+
     init(habit: HabitEntity) {
         self.habit = habit
         let dates = habit.entries.map { Calendar.current.startOfDay(for: $0.timestamp) }
         _completedDates = State(initialValue: Set(dates))
+        hapticGenerator.prepare()
     }
     
     var body: some View {
         VStack(spacing: 24) {
-            // Month navigation
             HStack {
                 Button(action: { moveMonth(-1) }) {
                     Image(systemName: "chevron.left")
@@ -45,9 +47,7 @@ struct CompletionCalendarView: View {
             }
             .padding(.horizontal, 4)
             
-            // Calendar grid
             VStack(spacing: 12) {
-                // Weekday headers
                 HStack(spacing: 0) {
                     Text("WK")
                         .frame(width: 40, alignment: .leading)
@@ -62,7 +62,6 @@ struct CompletionCalendarView: View {
                     }
                 }
                 
-                // Calendar days
                 ForEach(0..<weekRows, id: \.self) { row in
                     HStack(spacing: 0) {
                         Text(getWeekNumber(forRow: row))
@@ -109,7 +108,6 @@ struct CompletionCalendarView: View {
         
         guard targetDate <= today else { return }
         
-        // Optimistic UI update
         if completedDates.contains(targetDate) {
             completedDates.remove(targetDate)
         } else {
@@ -117,6 +115,8 @@ struct CompletionCalendarView: View {
         }
         
         HabitEntity.toggleCompletion(habit: habit, date: date, context: modelContext, allHabits: allHabits)
+        hapticGenerator.impactOccurred()
+        hapticGenerator.prepare()
     }
     
     private func monthYearString(from date: Date) -> String {
@@ -194,7 +194,7 @@ struct CalendarDayButton: View {
     let onTap: () -> Void
     
     private let calendar = Calendar.current
-    private let dayNumberSize: CGFloat = 20 
+    private let dayNumberSize: CGFloat = 20
     private let dotSize: CGFloat = 6
     private let totalCellHeight: CGFloat = 36
 

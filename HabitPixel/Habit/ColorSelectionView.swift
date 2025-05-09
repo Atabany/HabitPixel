@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UIKit
 
 struct ColorSelectionView: View {
     @Environment(\.dismiss) var dismiss
@@ -13,6 +14,12 @@ struct ColorSelectionView: View {
     
     // Changed from 7 to 5 columns to accommodate larger sizes
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 16), count: 5)
+    private let lightHapticGenerator = UIImpactFeedbackGenerator(style: .light)
+
+    init(selectedColor: Binding<Color>) {
+        self._selectedColor = selectedColor
+        lightHapticGenerator.prepare()
+    }
     
     var body: some View {
         ScrollView {
@@ -21,7 +28,8 @@ struct ColorSelectionView: View {
                     ColorButton(
                         color: variant.adaptive,
                         selectedColor: selectedColor,
-                        isHighlighted: false
+                        isHighlighted: false,
+                        hapticGenerator: lightHapticGenerator
                     ) {
                         selectedColor = variant.adaptive
                         dismiss()

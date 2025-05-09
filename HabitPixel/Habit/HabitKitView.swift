@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import UIKit
 
 enum DisplayMode: String, CaseIterable {
     case cards, rows
@@ -232,7 +233,9 @@ struct HabitKitView: View {
     @State private var showingStats = false
     @State private var showingProUpgrade = false
     @State private var selectedCategory: Category = .all
-    @State private var displayMode: DisplayMode = .rows
+    @AppStorage("displayMode") private var displayMode: DisplayMode = .rows
+    private let hapticGenerator = UIImpactFeedbackGenerator(style: .medium)
+    private let lightHapticGenerator = UIImpactFeedbackGenerator(style: .light)
     
     private var isProUser: Bool {
         // TODO: Replace with actual premium status check
@@ -299,7 +302,11 @@ struct HabitKitView: View {
                                 .font(.headline)
                                 .foregroundColor(Color.theme.caption)
                             
-                            Button(action: { showingNewHabit = true }) {
+                            Button(action: {
+                                lightHapticGenerator.impactOccurred()
+                                showingNewHabit = true
+                                lightHapticGenerator.prepare()
+                            }) {
                                 Text("Add Habit")
                                     .font(.subheadline)
                                     .fontWeight(.medium)
@@ -343,12 +350,20 @@ struct HabitKitView: View {
             .navigationTitle("HabitKit")
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarItems(
-                leading: Button(action: { showingSettings = true }) {
+                leading: Button(action: {
+                    lightHapticGenerator.impactOccurred()
+                    showingSettings = true
+                    lightHapticGenerator.prepare()
+                }) {
                     Image(systemName: "gearshape.fill")
                         .foregroundColor(Color.theme.onBackground)
                 },
                 trailing: HStack(spacing: 16) {
-                    Button(action: { showingProUpgrade = true }) {
+                    Button(action: {
+                        lightHapticGenerator.impactOccurred()
+                        showingProUpgrade = true
+                        lightHapticGenerator.prepare()
+                    }) {
                         Text("PRO")
                             .font(.subheadline)
                             .fontWeight(.medium)
@@ -359,17 +374,23 @@ struct HabitKitView: View {
                             .foregroundColor(Color.theme.onBackground)
                     }
                     
-                    Button(action: { showingStats = true }) {
+                    Button(action: {
+                        lightHapticGenerator.impactOccurred()
+                        showingStats = true
+                        lightHapticGenerator.prepare()
+                    }) {
                         Image(systemName: "chart.bar.fill")
                             .foregroundColor(Color.theme.onBackground)
                     }
                     
                     Button(action: {
+                        lightHapticGenerator.impactOccurred()
                         if canAddMoreHabits {
                             showingNewHabit = true
                         } else {
                             showingProUpgrade = true
                         }
+                        lightHapticGenerator.prepare()
                     }) {
                         Image(systemName: "plus")
                             .foregroundColor(Color.theme.onBackground)
@@ -393,6 +414,10 @@ struct HabitKitView: View {
                     selectedCategory = .all
                 }
             }
+            .onAppear {
+                hapticGenerator.prepare()
+                lightHapticGenerator.prepare()
+            }
         }
     }
     
@@ -402,6 +427,8 @@ struct HabitKitView: View {
     
     private func toggleTodayCompletion(for habit: HabitEntity) {
         HabitEntity.toggleCompletion(habit: habit, date: Date(), context: modelContext, allHabits: habits)
+        hapticGenerator.impactOccurred()
+        hapticGenerator.prepare()
     }
     
     private func isTodayCompleted(for habit: HabitEntity) -> Bool {

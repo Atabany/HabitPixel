@@ -1,9 +1,11 @@
 import SwiftUI
+import UIKit
 
 struct IconSelectionView: View {
     @Binding var selectedIcon: String
     @State private var searchText = ""
     @State private var selectedCategory = Category.all
+    private let lightHapticGenerator = UIImpactFeedbackGenerator(style: .light)
     
     private var filteredIcons: [String] {
         let allIcons = selectedCategory == .all
@@ -16,9 +18,13 @@ struct IconSelectionView: View {
         return allIcons.filter { $0.localizedCaseInsensitiveContains(searchText) }
     }
     
+    init(selectedIcon: Binding<String>) {
+        self._selectedIcon = selectedIcon
+        lightHapticGenerator.prepare()
+    }
+    
     var body: some View {
         VStack(spacing: 20) {
-            // Search bar
             HStack {
                 Image(systemName: "magnifyingglass")
                     .foregroundColor(Color.theme.caption)
@@ -36,11 +42,14 @@ struct IconSelectionView: View {
             .cornerRadius(12)
             .padding(.horizontal)
             
-            // Category filter
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
                     ForEach(Category.categories) { category in
-                        Button(action: { selectedCategory = category }) {
+                        Button(action: {
+                            lightHapticGenerator.impactOccurred()
+                            selectedCategory = category
+                            lightHapticGenerator.prepare()
+                        }) {
                             HStack(spacing: 6) {
                                 Image(systemName: category.icon)
                                     .font(.caption)
@@ -59,11 +68,14 @@ struct IconSelectionView: View {
                 .padding(.horizontal)
             }
             
-            // Icons grid
             ScrollView {
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 70))], spacing: 16) {
                     ForEach(filteredIcons, id: \.self) { icon in
-                        Button(action: { selectedIcon = icon }) {
+                        Button(action: {
+                            lightHapticGenerator.impactOccurred()
+                            selectedIcon = icon
+                            lightHapticGenerator.prepare()
+                        }) {
                             VStack {
                                 Image(systemName: icon)
                                     .font(.title2)
