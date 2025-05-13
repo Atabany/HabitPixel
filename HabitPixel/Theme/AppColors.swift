@@ -17,7 +17,7 @@ struct ThemeColors {
     let background = Color(uiColor: UIColor { traitCollection in
         switch traitCollection.userInterfaceStyle {
         case .dark: return UIColor(hex: 0x151518)
-        default: return UIColor(hex: 0xFBFBFB)
+        default: return UIColor(hex: 0xF2F2F7)
         }
     })
     

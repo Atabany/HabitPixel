@@ -44,10 +44,26 @@ struct HabitActivityGrid: View {
                 }
                 .frame(height: viewModel.gridHeight)
             } else {
-                ProgressView()
-                    .task {
-                        await viewModel.loadInitialData()
+                // Show an empty grid with the same layout, all cells unfilled
+                let weeksToShow = 15
+                let daysInWeek = 7
+                let cellSize = viewModel.cellSize
+                let spacing = viewModel.spacing
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: spacing) {
+                        ForEach(0..<weeksToShow, id: \ .self) { _ in
+                            VStack(spacing: spacing) {
+                                ForEach(0..<daysInWeek, id: \ .self) { _ in
+                                    RoundedRectangle(cornerRadius: 2)
+                                        .fill(Color.theme.onBackground.opacity(0.07))
+                                        .frame(width: cellSize, height: cellSize)
+                                }
+                            }
+                        }
                     }
+                    .padding(.vertical, 8)
+                }
+                .frame(height: viewModel.gridHeight)
             }
         }
         .onChange(of: habit.entries) { _, _ in
@@ -64,6 +80,11 @@ struct HabitActivityGrid: View {
                )) {
                 viewModel.allHabits = allHabits
                 WidgetManager.shared.syncWidgets(allHabits)
+            }
+            if viewModel.gridData == nil {
+                Task {
+                    await viewModel.loadInitialData()
+                }
             }
         }
     }

@@ -17,7 +17,7 @@ struct UnlockProView: View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 24) {
-                    Text("Unlock HabitKit Pro")
+                    Text("Unlock HabitRix Pro")
                         .font(.title2)
                         .fontWeight(.bold)
                     

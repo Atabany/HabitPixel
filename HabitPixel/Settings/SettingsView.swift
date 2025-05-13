@@ -5,6 +5,9 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     @State private var showingProView = false
+    @State private var showingProUpgradeForArchive = false
+    @State private var showingProUpgradeForReorder = false
+    private let isProUser = SharedStorage.shared.isPro
     
     var body: some View {
         NavigationStack {
@@ -22,7 +25,7 @@ struct SettingsView: View {
                                     )
                                 )
                             VStack(alignment: .leading) {
-                                Text("Subscribe to HabitKit Pro")
+                                Text("Subscribe to HabitRix Pro")
                                     .font(.headline)
                                 Text("Unlimited habits, import/export data,...")
                                     .font(.caption)
@@ -37,11 +40,25 @@ struct SettingsView: View {
                     NavigationLink(destination: ThemeSettingsView()) {
                         SettingsRowView(icon: "paintbrush.fill", title: "Theme", color: .orange)
                     }
-                    NavigationLink(destination: ArchivedHabitsView(modelContext: modelContext)) {
-                        SettingsRowView(icon: "archivebox.fill", title: "Archived Habits", color: .cyan)
+                    
+                    if isProUser {
+                        NavigationLink(destination: ArchivedHabitsView(modelContext: modelContext)) {
+                            SettingsRowView(icon: "archivebox.fill", title: "Archived Habits", color: .cyan)
+                        }
+                    } else {
+                        Button(action: { showingProUpgradeForArchive = true }) {
+                            SettingsRowView(icon: "archivebox.fill", title: "Archived Habits", color: .cyan)
+                        }
                     }
-                    NavigationLink(destination: ReorderHabitsView(modelContext: modelContext)) {
-                        SettingsRowView(icon: "list.bullet", title: "Reorder Habits", color: .red)
+                    
+                    if isProUser {
+                        NavigationLink(destination: ReorderHabitsView(modelContext: modelContext)) {
+                            SettingsRowView(icon: "list.bullet", title: "Reorder Habits", color: .red)
+                        }
+                    } else {
+                        Button(action: { showingProUpgradeForReorder = true }) {
+                            SettingsRowView(icon: "list.bullet", title: "Reorder Habits", color: .red)
+                        }
                     }
                 }
                 
@@ -75,6 +92,12 @@ struct SettingsView: View {
                 }
             }
             .sheet(isPresented: $showingProView) {
+                UnlockProView()
+            }
+            .sheet(isPresented: $showingProUpgradeForArchive) {
+                UnlockProView()
+            }
+            .sheet(isPresented: $showingProUpgradeForReorder) {
                 UnlockProView()
             }
         }

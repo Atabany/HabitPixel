@@ -234,7 +234,11 @@ struct ShareHabitView: View {
                     let now = Date()
                     let weeksToShow = 15
                     let daysInWeek = 7
-                    let startDate = calendar.date(byAdding: .day, value: -(weeksToShow * daysInWeek) + daysInWeek, to: now) ?? now
+                    
+                    // Get the start of the current week (Monday)
+                    let weekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)) ?? now
+                    // Calculate the start date by going back (weeksToShow - 1) weeks
+                    let startDate = calendar.date(byAdding: .day, value: -(weeksToShow - 1) * daysInWeek, to: weekStart) ?? now
                     
                     VStack(spacing: 3) {
                         ForEach(0..<daysInWeek, id: \.self) { dayIndex in
@@ -254,23 +258,42 @@ struct ShareHabitView: View {
                     .padding(.vertical, 8)
                     
                     // Footer
-                    HStack {
-                        Text("\(habit.goal) / \(habit.frequency)")
-                            .font(.subheadline)
-                            .foregroundColor(isDarkMode ? .white.opacity(0.7) : .black.opacity(0.7))
-                        
-                        Spacer()
-                        
-                        if showStreak {
+                    HStack(spacing: 35) {
+                        VStack {
+                            Text(habit.frequency)
+                                .font(.subheadline)
+                                .foregroundColor(isDarkMode ? .white.opacity(0.7) : .black.opacity(0.7))
                             HStack(spacing: 4) {
-                                Image(systemName: "flame.fill")
-                                    .foregroundColor(.orange)
-                                Text("\(habit.currentStreak())")
-                                    .foregroundColor(isDarkMode ? .white : .black)
+                                Text("\(habit.getCompletionsInCurrentInterval())")
+                                Text("/")
+                                Text("\(habit.goal)")
                             }
-                            .font(.subheadline)
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .foregroundColor(isDarkMode ? .white : .black)
+                        }
+                        
+                        VStack {
+                            Text("Streak")
+                                .font(.subheadline)
+                                .foregroundColor(isDarkMode ? .white.opacity(0.7) : .black.opacity(0.7))
+                            Text("\(habit.currentStreak())")
+                                .font(.title2)
+                                .fontWeight(.bold)
+                                .foregroundColor(selectedColor)
+                        }
+                        
+                        VStack {
+                            Text("Remaining")
+                                .font(.subheadline)
+                                .foregroundColor(isDarkMode ? .white.opacity(0.7) : .black.opacity(0.7))
+                            Text("\(habit.getRemainingForCurrentInterval())")
+                                .font(.title2)
+                                .fontWeight(.bold)
+                                .foregroundColor(isDarkMode ? .white.opacity(0.7) : .black.opacity(0.7))
                         }
                     }
+                    .padding(.bottom, 8)
 
                     // App Branding
                     HStack {
@@ -280,7 +303,7 @@ struct ShareHabitView: View {
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: 20, height: 20)
-                            Text("HabitKit")
+                            Text("HabitRix")
                                 .font(.caption)
                         }
                         .foregroundColor(isDarkMode ? .white.opacity(0.5) : .black.opacity(0.5))
