@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import WidgetKit
 
 class ArchivedHabitsViewModel: ObservableObject {
     @Published var archivedHabits: [HabitEntity] = []
@@ -33,6 +34,14 @@ class ArchivedHabitsViewModel: ObservableObject {
         do {
             try modelContext.save()
             loadArchivedHabits() // Refresh the list
+            
+            // Update widget after unarchiving
+            let allHabitsDescriptor = FetchDescriptor<HabitEntity>()
+            if let allHabits = try? modelContext.fetch(allHabitsDescriptor) {
+                Task { @MainActor in
+                    await HabitEntity.updateWidgetHabits(allHabits)
+                }
+            }
         } catch {
             // Log or handle error unarchiving habit
             // Error: \(error)
@@ -45,6 +54,14 @@ class ArchivedHabitsViewModel: ObservableObject {
         do {
             try modelContext.save()
             loadArchivedHabits() // Refresh the list
+            
+            // Update widget after deletion
+            let allHabitsDescriptor = FetchDescriptor<HabitEntity>()
+            if let allHabits = try? modelContext.fetch(allHabitsDescriptor) {
+                Task { @MainActor in
+                    await HabitEntity.updateWidgetHabits(allHabits)
+                }
+            }
         } catch {
             // Log or handle error deleting archived habit
             // Error: \(error)

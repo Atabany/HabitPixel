@@ -1,4 +1,3 @@
-
 import WidgetKit
 import AppIntents
 import Intents
@@ -15,11 +14,13 @@ struct SelectHabitIntent: AppIntent, WidgetConfigurationIntent, CustomIntentMigr
     
     struct HabitOptionsProvider: DynamicOptionsProvider {
         func results() async throws -> [String] {
-            HabitsHelper.loadAllHabits()?.compactMap(\.title) ?? []
+            let habits = HabitsHelper.loadAllHabits()
+            return habits?.compactMap(\.title) ?? []
         }
 
         func defaultResult() async -> String? {
-            HabitsHelper.loadAllHabits()?.first?.title
+            let habits = HabitsHelper.loadAllHabits()
+            return habits?.first?.title
         }
     }
 }

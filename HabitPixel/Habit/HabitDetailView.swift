@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import WidgetKit
 
 struct HabitDetailView: View {
     @Environment(\.dismiss) private var dismiss
@@ -16,8 +17,32 @@ struct HabitDetailView: View {
             habit.isArchived = true
             habit.archivedDate = Date()
             try? modelContext.save()
+            
+            // Update widget after archiving
+            let allHabitsDescriptor = FetchDescriptor<HabitEntity>()
+            if let allHabits = try? modelContext.fetch(allHabitsDescriptor) {
+                Task { @MainActor in
+                    await HabitEntity.updateWidgetHabits(allHabits)
+                }
+            }
+            
             dismiss()
         }
+    }
+    
+    private func deleteHabit() {
+        modelContext.delete(habit)
+        try? modelContext.save()
+        
+        // Update widget after deletion
+        let allHabitsDescriptor = FetchDescriptor<HabitEntity>()
+        if let allHabits = try? modelContext.fetch(allHabitsDescriptor) {
+            Task { @MainActor in
+                await HabitEntity.updateWidgetHabits(allHabits)
+            }
+        }
+        
+        dismiss()
     }
     
     var body: some View {
@@ -173,8 +198,7 @@ struct HabitDetailView: View {
         .alert("Delete Habit", isPresented: $showingDeleteAlert) {
             Button("Cancel", role: .cancel) { }
             Button("Delete", role: .destructive) {
-                modelContext.delete(habit)
-                dismiss()
+                deleteHabit()
             }
         } message: {
             Text("Are you sure you want to delete this habit? This action cannot be undone.")

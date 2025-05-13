@@ -33,26 +33,38 @@ struct Provider: AppIntentTimelineProvider {
     
     func timeline(for configuration: SelectHabitIntent, in context: Context) async -> Timeline<HabitEntry> {
         let selectedTitle = configuration.habit
-        let allHabits = HabitsHelper.loadAllHabits()
+        let allHabits = HabitsHelper.loadAllHabits() ?? []
         
-        let selectedHabit = allHabits?.first(where: { $0.title == selectedTitle }) ?? HabitsHelper.noHabitDisplayInfo
-        
-        let isFreeHabit = selectedHabit.id == allHabits?.first?.id
-        
-        let entry = HabitEntry(
-            date: .now,
-            habit: selectedHabit,
-            isFreeHabit: isFreeHabit
-        )
-        
-        // Set next update to the start of the next day (12:00 AM)
-        let calendar = Calendar.current
-        let now = Date()
-        let startOfToday = calendar.startOfDay(for: now)
-        let nextUpdateDate = calendar.date(byAdding: .day, value: 1, to: startOfToday)!
+        // If we have habits but the selected one isn't found, default to the first habit
+        if !allHabits.isEmpty {
+            let selectedHabit = allHabits.first(where: { $0.title == selectedTitle }) ?? allHabits[0]
+            let isFreeHabit = selectedHabit.id == allHabits[0].id
+            
+            let entry = HabitEntry(
+                date: .now,
+                habit: selectedHabit,
+                isFreeHabit: isFreeHabit
+            )
+            
+            // Set next update to the start of the next day (12:00 AM)
+            let calendar = Calendar.current
+            let now = Date()
+            let startOfToday = calendar.startOfDay(for: now)
+            let nextUpdateDate = calendar.date(byAdding: .day, value: 1, to: startOfToday)!
 
-        return Timeline(entries: [entry], policy: .after(nextUpdateDate))
-    }}
+            return Timeline(entries: [entry], policy: .after(nextUpdateDate))
+        } else {
+            // No habits at all
+            let entry = HabitEntry(
+                date: .now,
+                habit: HabitsHelper.noHabitDisplayInfo,
+                isFreeHabit: true
+            )
+            
+            return Timeline(entries: [entry], policy: .after(.now.addingTimeInterval(3600))) // Update after an hour
+        }
+    }
+}
 
 struct HabitPixelWidgetEntryView: View {
     var entry: Provider.Entry
@@ -60,7 +72,6 @@ struct HabitPixelWidgetEntryView: View {
     @Environment(\.colorScheme) var colorScheme
     
     private var isPro: Bool {
-        return true
         UserDefaults(suiteName: "group.com.atabany.HabitPixel")?.bool(forKey: "isPro") ?? false
     }
     
