@@ -79,24 +79,19 @@ struct HabitPixelApp: App {
                 if !widgetHabits.isEmpty {
                     do {
                         let encoded = try JSONEncoder().encode(widgetHabits)
-                        let defaults = UserDefaults(suiteName: "group.com.atabany.HabitPixel")
-                        defaults?.set(encoded, forKey: "WidgetHabits")
+                        @AppStorage("WidgetHabits") var widgetHabitsData: Data = Data()
+                        widgetHabitsData = encoded
 
-                        // Explicitly synchronize UserDefaults for App Groups
-                        if defaults?.synchronize() == true {
-                            // Reload widget timelines after successful sync
-                            WidgetCenter.shared.reloadAllTimelines()
-                        } else {
-                            // Log error - Failed to synchronize UserDefaults for App Group. Widget data might be stale.
-                        }
-
+                        // Reload widget timelines after successful sync
+                        WidgetCenter.shared.reloadAllTimelines()
                     } catch {
                         // Log error - Failed to encode habits for widget sync. Error: \(error)
                     }
                 } else {
                     // No active habits found to sync with the widget.
                     // Consider clearing widget data if needed:
-                    // UserDefaults(suiteName: "group.com.atabany.HabitPixel")?.removeObject(forKey: "WidgetHabits")
+                    // @AppStorage("WidgetHabits") private var widgetHabitsData: Data = Data()
+                    // widgetHabitsData = Data()
                     // WidgetCenter.shared.reloadAllTimelines() // Reload to show empty/placeholder state
                 }
             } catch {

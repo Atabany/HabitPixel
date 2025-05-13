@@ -72,7 +72,7 @@ struct HabitPixelWidgetEntryView: View {
     @Environment(\.colorScheme) var colorScheme
     
     private var isPro: Bool {
-        UserDefaults(suiteName: "group.com.atabany.HabitPixel")?.bool(forKey: "isPro") ?? false
+        SharedStorage.shared.isPro
     }
     
     private var colors: ColorScheme {

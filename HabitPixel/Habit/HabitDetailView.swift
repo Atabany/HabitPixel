@@ -21,9 +21,7 @@ struct HabitDetailView: View {
             // Update widget after archiving
             let allHabitsDescriptor = FetchDescriptor<HabitEntity>()
             if let allHabits = try? modelContext.fetch(allHabitsDescriptor) {
-                Task { @MainActor in
-                    await HabitEntity.updateWidgetHabits(allHabits)
-                }
+                WidgetManager.shared.syncWidgets(allHabits)
             }
             
             dismiss()
@@ -37,9 +35,7 @@ struct HabitDetailView: View {
         // Update widget after deletion
         let allHabitsDescriptor = FetchDescriptor<HabitEntity>()
         if let allHabits = try? modelContext.fetch(allHabitsDescriptor) {
-            Task { @MainActor in
-                await HabitEntity.updateWidgetHabits(allHabits)
-            }
+            WidgetManager.shared.syncWidgets(allHabits)
         }
         
         dismiss()

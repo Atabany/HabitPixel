@@ -3,45 +3,46 @@ import SwiftData
 import WidgetKit
 
 struct ReorderHabitsView: View {
-    @Query(
-        filter: #Predicate<HabitEntity> { habit in
-            habit.isArchived == false
-        },
-        sort: \HabitEntity.createdAt
-    ) private var habits: [HabitEntity]
     @Environment(\.modelContext) private var modelContext
+    @Query(filter: #Predicate<HabitEntity> { habit in
+        habit.isArchived == false
+    }, sort: \HabitEntity.title) private var habits: [HabitEntity]
+    @State private var reorderableHabits: [HabitEntity]
+    
+    init(modelContext: ModelContext) {
+        let descriptor = FetchDescriptor<HabitEntity>(
+            predicate: #Predicate<HabitEntity> { habit in
+                habit.isArchived == false
+            },
+            sortBy: [SortDescriptor(\HabitEntity.title)]
+        )
+        
+        _reorderableHabits = State(initialValue: (try? modelContext.fetch(descriptor)) ?? [])
+    }
     
     var body: some View {
         List {
-            if habits.isEmpty {
+            if reorderableHabits.isEmpty {
                 ContentUnavailableView("No habits found",
                     systemImage: "list.bullet",
                     description: Text("You need to create at least one habit to do something here")
                 )
             } else {
-                ForEach(habits) { habit in
+                ForEach(reorderableHabits, id: \.self) { habit in
                     HStack {
                         Image(systemName: habit.iconName)
-                            .foregroundColor(habit.color)
+                            .foregroundStyle(habit.color)
+                            .font(.title3)
                         Text(habit.title)
                     }
                 }
-                .onMove { from, to in
-                    var updatedHabits = habits
-                    updatedHabits.move(fromOffsets: from, toOffset: to)
+                .onMove { indexSet, destination in
+                    reorderableHabits.move(fromOffsets: indexSet, toOffset: destination)
                     
-                    let now = Date()
-                    for (index, habit) in updatedHabits.enumerated() {
-                        habit.createdAt = now.addingTimeInterval(TimeInterval(index * 60))
-                    }
-                    
-                    do {
-                        try modelContext.save()
-                        Task {
-                            await HabitEntity.updateWidgetHabits(updatedHabits)
-                        }
-                    } catch {
-                        print("Failed to save reordered habits: \(error)")
+                    // Update order
+                    Task {
+                        // Make sure to pass the updated order to the widget
+                        await WidgetManager.shared.syncWidgets(reorderableHabits)
                     }
                 }
             }

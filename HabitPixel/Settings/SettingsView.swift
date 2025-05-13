@@ -40,7 +40,7 @@ struct SettingsView: View {
                     NavigationLink(destination: ArchivedHabitsView(modelContext: modelContext)) {
                         SettingsRowView(icon: "archivebox.fill", title: "Archived Habits", color: .cyan)
                     }
-                    NavigationLink(destination: ReorderHabitsView()) {
+                    NavigationLink(destination: ReorderHabitsView(modelContext: modelContext)) {
                         SettingsRowView(icon: "list.bullet", title: "Reorder Habits", color: .red)
                     }
                 }

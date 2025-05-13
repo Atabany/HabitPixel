@@ -6,14 +6,19 @@ struct HabitActivityGrid: View {
     let habit: HabitEntity
     var overrideColor: Color?
     @Environment(\.modelContext) private var modelContext
-    @Query private var allHabits: [HabitEntity]
     @StateObject private var viewModel: HabitActivityGridViewModel
     
     init(habit: HabitEntity, overrideColor: Color? = nil) {
         self.habit = habit
         self.overrideColor = overrideColor
-        _allHabits = Query()
-        _viewModel = StateObject(wrappedValue: HabitActivityGridViewModel(habit: habit, allHabits: []))
+        // Get all non-archived habits for widget sync
+        let descriptor = FetchDescriptor<HabitEntity>(
+            predicate: #Predicate<HabitEntity> { habit in
+                habit.isArchived == false
+            }
+        )
+        let allHabits = try? habit.modelContext?.fetch(descriptor) ?? []
+        _viewModel = StateObject(wrappedValue: HabitActivityGridViewModel(habit: habit, allHabits: allHabits ?? []))
     }
     
     var body: some View {
@@ -50,18 +55,15 @@ struct HabitActivityGrid: View {
                 await viewModel.updateGridData()
             }
         }
-        .onChange(of: allHabits) { _, newValue in
-            viewModel.allHabits = newValue
-            Task {
-                await viewModel.updateGridData()
-            }
-        }
         .onAppear {
-            if !allHabits.isEmpty {
-                viewModel.allHabits = allHabits
-                Task {
-                    await HabitEntity.updateWidgetHabits(allHabits)
+            if let context = habit.modelContext,
+               let allHabits = try? context.fetch(FetchDescriptor<HabitEntity>(
+                predicate: #Predicate<HabitEntity> { habit in
+                    habit.isArchived == false
                 }
+               )) {
+                viewModel.allHabits = allHabits
+                WidgetManager.shared.syncWidgets(allHabits)
             }
         }
     }

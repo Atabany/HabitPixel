@@ -350,10 +350,8 @@ extension HabitEntity {
         do {
             try context.save()
             
-            // Move widget update to after successful save
-            Task { @MainActor in
-                await Self.updateWidgetHabits(allHabits)
-            }
+            // Update widget using WidgetManager
+            WidgetManager.shared.syncWidgets(allHabits)
         } catch {
             print("Error saving context in toggleCompletion: \(error)")
             habit.invalidateCache()
@@ -361,36 +359,6 @@ extension HabitEntity {
         }
     }
     
-    static func updateWidgetHabits(_ habits: [HabitEntity]) async {
-        // Create a snapshot of the data we need to avoid model context issues
-        let displayInfos = habits.map {
-            HabitDisplayInfo(
-                id: "\($0.persistentModelID)",
-                title: $0.title,
-                iconName: $0.iconName,
-                color: $0.color,
-                completedDates: Set($0.entries.map { Calendar.current.startOfDay(for: $0.timestamp) }),
-                startDate: $0.dateRange?.first ?? $0.createdAt,
-                endDate: $0.dateRange?.last ?? $0.createdAt
-            )
-        }
-        
-        let defaults = UserDefaults(suiteName: "group.com.atabany.HabitPixel")
-        
-        do {
-            let encoder = JSONEncoder()
-            encoder.dateEncodingStrategy = .iso8601
-            let data = try encoder.encode(displayInfos)
-            defaults?.set(data, forKey: "WidgetHabits")
-            
-            await MainActor.run {
-                WidgetCenter.shared.reloadAllTimelines()
-            }
-        } catch {
-            print("Error encoding/saving widget data: \(error)")
-        }
-    }
-
     static func isDateCompleted(habit: HabitEntity, date: Date) -> Bool {
         habit.ensureCacheInitialized()
         let calendar = Calendar.current

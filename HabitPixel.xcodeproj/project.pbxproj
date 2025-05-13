@@ -73,6 +73,7 @@
 		2D99F10C2D98808A009C7A8F /* Exceptions for "HabitPixel" folder in "HabitPixelWidget" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Shared/SharedStorage.swift,
 				Shared/WidgetModels.swift,
 			);
 			target = 2D99F0EE2D987A56009C7A8F /* HabitPixelWidget */;

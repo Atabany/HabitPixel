@@ -38,13 +38,10 @@ class ArchivedHabitsViewModel: ObservableObject {
             // Update widget after unarchiving
             let allHabitsDescriptor = FetchDescriptor<HabitEntity>()
             if let allHabits = try? modelContext.fetch(allHabitsDescriptor) {
-                Task { @MainActor in
-                    await HabitEntity.updateWidgetHabits(allHabits)
-                }
+                WidgetManager.shared.syncWidgets(allHabits)
             }
         } catch {
             // Log or handle error unarchiving habit
-            // Error: \(error)
         }
     }
     
@@ -58,13 +55,10 @@ class ArchivedHabitsViewModel: ObservableObject {
             // Update widget after deletion
             let allHabitsDescriptor = FetchDescriptor<HabitEntity>()
             if let allHabits = try? modelContext.fetch(allHabitsDescriptor) {
-                Task { @MainActor in
-                    await HabitEntity.updateWidgetHabits(allHabits)
-                }
+                WidgetManager.shared.syncWidgets(allHabits)
             }
         } catch {
             // Log or handle error deleting archived habit
-            // Error: \(error)
         }
     }
 }
