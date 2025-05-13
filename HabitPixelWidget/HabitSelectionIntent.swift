@@ -1,74 +1,25 @@
 
-import Foundation
 import WidgetKit
 import AppIntents
-import SwiftUI
+import Intents
+import IntentsUI
 
-// MARK: - AppEntity representing a habit the user can pick
-struct HabitEntity: Identifiable, Hashable, AppEntity {
-    static var typeDisplayName: LocalizedStringResource = "Habit"
-
-    var id: String
-    var title: String
-
-    static var defaultQuery = HabitQuery()
+struct SelectHabitIntent: AppIntent, WidgetConfigurationIntent, CustomIntentMigratedAppIntent {
     
-    static var typeDisplayRepresentation: TypeDisplayRepresentation = "Habit"
+    static let intentClassName: String = "SelectHabitIntent"
+    static var title: LocalizedStringResource =  "Select Habit"
+    static var description = IntentDescription("Choose a habit to track")
     
-    var displayRepresentation: DisplayRepresentation {
-        DisplayRepresentation(title: "\(title)")
-    }
-
-    init(id: String, title: String) {
-        self.id = id
-        self.title = title
-    }
-
-    static func suggestedEntities() async throws -> [HabitEntity] {
-        return try await HabitQuery().suggestedEntities()
-    }
-
-    static func defaultResult() async -> HabitEntity? {
-        return try? await HabitQuery().suggestedEntities().first
-    }
-}
-
-// MARK: EntityQuery supplying the dynamic list
-struct HabitQuery: EntityQuery {
-    func entities(for identifiers: [String]) async throws -> [HabitEntity] {
-        guard let defaults = UserDefaults(suiteName: "group.com.atabany.HabitPixel"),
-              let data = defaults.data(forKey: "WidgetHabits") else {
-            return []
-        }
-        
-        do {
-            let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .iso8601
-            let habits = try decoder.decode([HabitDisplayInfo].self, from: data)
-            return habits.map { HabitEntity(id: $0.id, title: $0.title) }
-        } catch {
-            return []
-        }
-    }
+    @Parameter(title: "Habit", optionsProvider: HabitOptionsProvider())
+    var habit: String?
     
-    func suggestedEntities() async throws -> [HabitEntity] {
-        guard let defaults = UserDefaults(suiteName: "group.com.atabany.HabitPixel"),
-              let data = defaults.data(forKey: "WidgetHabits") else {
-            return []
+    struct HabitOptionsProvider: DynamicOptionsProvider {
+        func results() async throws -> [String] {
+            HabitsHelper.loadAllHabits()?.compactMap(\.title) ?? []
         }
-        
-        do {
-            let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .iso8601
-            let habits = try decoder.decode([HabitDisplayInfo].self, from: data)
-            return habits.map { HabitEntity(id: $0.id, title: $0.title) }
-        } catch {
-            return []
-        }
-    }
 
-    static func getSuggestedHabit() async -> HabitEntity? {
-        let query = HabitQuery()
-        return try? await query.suggestedEntities().first
+        func defaultResult() async -> String? {
+            HabitsHelper.loadAllHabits()?.first?.title
+        }
     }
 }

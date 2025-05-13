@@ -349,19 +349,20 @@ extension HabitEntity {
 
         do {
             try context.save()
+            
+            // Move widget update to after successful save
+            Task { @MainActor in
+                await Self.updateWidgetHabits(allHabits)
+            }
         } catch {
             print("Error saving context in toggleCompletion: \(error)")
             habit.invalidateCache()
             return
         }
-        
-        Task(priority: .background) {
-            await Self.updateWidgetHabits(allHabits)
-        }
     }
     
     static func updateWidgetHabits(_ habits: [HabitEntity]) async {
-        let defaults = UserDefaults(suiteName: "group.com.atabany.HabitPixel")
+        // Create a snapshot of the data we need to avoid model context issues
         let displayInfos = habits.map {
             HabitDisplayInfo(
                 id: "\($0.persistentModelID)",
@@ -374,12 +375,14 @@ extension HabitEntity {
             )
         }
         
+        let defaults = UserDefaults(suiteName: "group.com.atabany.HabitPixel")
+        
         do {
             let encoder = JSONEncoder()
             encoder.dateEncodingStrategy = .iso8601
             let data = try encoder.encode(displayInfos)
             defaults?.set(data, forKey: "WidgetHabits")
-
+            
             await MainActor.run {
                 WidgetCenter.shared.reloadAllTimelines()
             }
@@ -387,7 +390,7 @@ extension HabitEntity {
             print("Error encoding/saving widget data: \(error)")
         }
     }
-    
+
     static func isDateCompleted(habit: HabitEntity, date: Date) -> Bool {
         habit.ensureCacheInitialized()
         let calendar = Calendar.current
