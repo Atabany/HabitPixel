@@ -52,4 +52,9 @@ class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
         let identifiers = habit.reminderDays.map { "habit-\(habit.id)-\($0)" }
         UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: identifiers)
     }
+    
+    func removeAllNotifications() {
+        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+        UNUserNotificationCenter.current().removeAllDeliveredNotifications()
+    }
 }

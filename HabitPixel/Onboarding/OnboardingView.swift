@@ -63,7 +63,7 @@ struct OnboardingView: View {
                 .font(.largeTitle)
                 .fontWeight(.bold)
                 .foregroundColor(Color.theme.onBackground)
-            Text("HabitPixel")
+            Text("HabitRix")
                 .font(.largeTitle)
                 .fontWeight(.bold)
                 .foregroundColor(Color.theme.primary)

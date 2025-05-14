@@ -2,6 +2,7 @@ import SwiftUI
 
 struct UnlockProView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var colorScheme
     
     private let monthlyPrice = "AED 7.99"
     private let annualPrice = "AED 49.99"
@@ -17,29 +18,46 @@ struct UnlockProView: View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 24) {
-                    Text("Unlock HabitRix Pro")
-                        .font(.title2)
-                        .fontWeight(.bold)
+                    // Header with Lottie animation
+                    VStack(spacing: 8) {
+                        LottieView(filename: colorScheme == .dark ? "upgrade-pro-dark" : "upgrade-pro-light")
+                            .frame(width: 120, height: 120)
+                        Text("Unlock HabitRix Pro")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                        Text("Upgrade for the ultimate habit experience!")
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                    }
+                    .padding(.top, 8)
                     
                     // Pricing Plans
                     VStack(spacing: 16) {
-                        // Monthly Plan
                         planButton(
                             plan: .monthly,
                             title: "Monthly",
                             price: monthlyPrice
                         )
-                        
-                        // Annual Plan (Best Value)
-                        planButton(
-                            plan: .annual,
-                            title: "Annual",
-                            price: annualPrice,
-                            savings: "-50%",
-                            originalPrice: "95.88"
-                        )
-                        
-                        // Lifetime Plan
+                        ZStack(alignment: .topTrailing) {
+                            planButton(
+                                plan: .annual,
+                                title: "Annual",
+                                price: annualPrice,
+                                savings: "-50%",
+                                originalPrice: "95.88"
+                            )
+                            if selectedPlan == .annual {
+                                Text("Most Popular")
+                                    .font(.caption2)
+                                    .fontWeight(.bold)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 2)
+                                    .background(Color.orange)
+                                    .foregroundColor(.white)
+                                    .clipShape(Capsule())
+                                    .offset(x: -12, y: -12)
+                            }
+                        }
                         planButton(
                             plan: .lifetime,
                             title: "Lifetime",
@@ -49,39 +67,43 @@ struct UnlockProView: View {
                     }
                     .padding(.vertical)
                     
+                    // Secure purchase badge
+                    HStack(spacing: 8) {
+                        Image(systemName: "lock.shield")
+                            .foregroundColor(.green)
+                        Text("Secure purchase. Cancel anytime.")
+                            .font(.footnote)
+                            .foregroundColor(.gray)
+                    }
+                    
                     // Features List
                     VStack(alignment: .leading, spacing: 20) {
                         Text("By subscribing you'll also unlock:")
                             .font(.headline)
-                        
                         featureRow(
                             icon: "number",
                             color: .green,
                             title: "Unlimited number of habits",
                             description: "Unlimited possibilities by creating as many habits as you like"
                         )
-                        
                         featureRow(
                             icon: "chart.bar",
                             color: .orange,
                             title: "Charts & Statistics",
                             description: "See charts and statistics about your consistency"
                         )
-                        
                         featureRow(
                             icon: "square.grid.2x2",
                             color: .blue,
                             title: "Home Screen Widgets",
                             description: "Show your favorite habits on your home screen"
                         )
-                        
                         featureRow(
                             icon: "rectangle.grid.2x2",
                             color: .teal,
                             title: "Dashboard Customization",
                             description: "Show streaks and goals, show labels and categories"
                         )
-                        
                         featureRow(
                             icon: "square.and.arrow.up",
                             color: .purple,
@@ -90,7 +112,10 @@ struct UnlockProView: View {
                         )
                     }
                     .padding()
+                    .background(Color.theme.surface.opacity(0.7))
+                    .clipShape(RoundedRectangle(cornerRadius: 18))
                     
+                    // Continue Button
                     Button(action: {
                         // TODO: Handle purchase
                     }) {
@@ -101,9 +126,11 @@ struct UnlockProView: View {
                             .background(Color.theme.primary)
                             .foregroundColor(.white)
                             .clipShape(RoundedRectangle(cornerRadius: 16))
+                            .shadow(color: Color.theme.primary.opacity(0.15), radius: 8, x: 0, y: 4)
                     }
                     .padding(.horizontal)
                     
+                    // Restore Button
                     Button(action: {
                         // TODO: Handle restore purchase
                     }) {
@@ -111,6 +138,39 @@ struct UnlockProView: View {
                             .font(.subheadline)
                             .foregroundColor(Color.theme.primary)
                     }
+                    .padding(.bottom, 4)
+                    
+                    // Legal links and disclaimer
+                    VStack(spacing: 8) {
+                        HStack(spacing: 16) {
+                            Button(action: {
+                                if let url = URL(string: "https://tamtom.github.io/habitrixpolicy.html") {
+                                    UIApplication.shared.open(url)
+                                }
+                            }) {
+                                Text("Privacy Policy")
+                                    .font(.footnote)
+                                    .underline()
+                                    .foregroundColor(.gray)
+                            }
+                            Button(action: {
+                                if let url = URL(string: "https://tamtom.github.io/habitrixterms.html") {
+                                    UIApplication.shared.open(url)
+                                }
+                            }) {
+                                Text("Terms of Use")
+                                    .font(.footnote)
+                                    .underline()
+                                    .foregroundColor(.gray)
+                            }
+                        }
+                        Text("Payment will be charged to your Apple ID account at confirmation of purchase. Subscription automatically renews unless canceled at least 24 hours before the end of the current period. You can manage or cancel your subscription in your App Store account settings after purchase.")
+                            .font(.caption2)
+                            .foregroundColor(.gray)
+                            .multilineTextAlignment(.center)
+                            .padding(.top, 2)
+                    }
+                    .padding(.top, 8)
                 }
                 .padding()
             }

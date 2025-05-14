@@ -13,7 +13,7 @@ extension Color {
 }
 
 struct ThemeColors {
-    let primary = Color(hex: 0x9233E9)
+    let primary = Color(hex: 0x0CA678)  // Modern teal color
     let background = Color(uiColor: UIColor { traitCollection in
         switch traitCollection.userInterfaceStyle {
         case .dark: return UIColor(hex: 0x151518)

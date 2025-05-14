@@ -183,29 +183,34 @@ struct HabitKitView: View {
             }
             
             if filteredHabits.isEmpty {
-                VStack(spacing: 12) {
-                    Image(systemName: "square.grid.2x2")
-                        .font(.largeTitle)
-                        .foregroundColor(Color.theme.caption)
-                    
+                VStack(spacing: 18) {
+                    LottieView(filename: "empty-state.json")
+                        .frame(width: 120, height: 120)
                     Text(habits.isEmpty ? "No habits yet" : "No habits in this category")
-                        .font(.headline)
+                        .font(.title3)
+                        .fontWeight(.semibold)
+                        .foregroundColor(Color.theme.onBackground)
+                    Text("Start building positive routines! Tap below to add your first habit.")
+                        .font(.subheadline)
                         .foregroundColor(Color.theme.caption)
-                    
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 24)
                     Button(action: {
                         lightHapticGenerator.impactOccurred()
                         showingNewHabit = true
                         lightHapticGenerator.prepare()
                     }) {
                         Text("Add Habit")
-                            .font(.subheadline)
-                            .fontWeight(.medium)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 8)
+                            .font(.headline)
+                            .fontWeight(.bold)
+                            .padding(.horizontal, 32)
+                            .padding(.vertical, 14)
                             .background(Color.theme.primary)
                             .foregroundColor(.white)
                             .clipShape(Capsule())
+                            .shadow(color: Color.theme.primary.opacity(0.18), radius: 8, x: 0, y: 4)
                     }
+                    .padding(.top, 6)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .padding(.vertical, 40)
@@ -414,8 +419,8 @@ struct WeekHabitCardView: View {
     let onToggleDay: (Date) -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Button(action: onShowDetail) {
+        Button(action: onShowDetail) {
+            VStack(alignment: .leading, spacing: 10) {
                 HStack(spacing: 10) {
                     Image(systemName: habit.iconName)
                         .font(.title2)
@@ -428,20 +433,22 @@ struct WeekHabitCardView: View {
                         .frame(minWidth: 80, alignment: .leading)
                     Spacer()
                 }
+                
+                WeekGridView(habit: habit, onToggleDay: onToggleDay)
+                    .allowsHitTesting(true)
             }
-            .buttonStyle(PlainButtonStyle())
-            WeekGridView(habit: habit, onToggleDay: onToggleDay)
+            .padding(.vertical, 10)
+            .padding(.horizontal, 14)
+            .background(Color.theme.surface)
+            .cornerRadius(18)
+            .shadow(color: Color.black.opacity(0.06), radius: 6, x: 0, y: 2)
+            .overlay(
+                RoundedRectangle(cornerRadius: 18)
+                    .stroke(Color.theme.border, lineWidth: 1)
+            )
+            .padding(.horizontal)
         }
-        .padding(.vertical, 10)
-        .padding(.horizontal, 14)
-        .background(Color.theme.surface)
-        .cornerRadius(18)
-        .shadow(color: Color.black.opacity(0.06), radius: 6, x: 0, y: 2)
-        .overlay(
-            RoundedRectangle(cornerRadius: 18)
-                .stroke(Color.theme.border, lineWidth: 1)
-        )
-        .padding(.horizontal)
+        .buttonStyle(PlainButtonStyle())
     }
 }
 
