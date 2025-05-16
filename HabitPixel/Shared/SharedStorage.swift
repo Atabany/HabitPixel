@@ -6,7 +6,7 @@ final class SharedStorage {
     let defaults: UserDefaults
     
     private init() {
-        guard let defaults = UserDefaults(suiteName: "group.com.atabany.HabitPixel") else {
+        guard let defaults = UserDefaults(suiteName: "group.com.atabany.HabitRix") else {
             fatalError("Failed to initialize app group UserDefaults")
         }
         self.defaults = defaults

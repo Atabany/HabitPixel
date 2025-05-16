@@ -1,6 +1,6 @@
 //
 //  HabitKitView.swift
-//  HabitPixel
+//  HabitRix
 //
 //  Created by Mohamed Elatabany on 23/03/2025.
 //
