@@ -1,6 +1,6 @@
 //
-//  HabitPixelApp.swift
-//  HabitPixel
+//  HabitRixApp.swift
+//  HabitRix
 //
 //  Created by Mohamed Elatabany on 22/03/2025.
 //
@@ -10,7 +10,7 @@ import SwiftData
 import WidgetKit
 
 @main
-struct HabitPixelApp: App {
+struct HabitRixApp: App {
     @AppStorage("selectedTheme") private var selectedTheme: ThemeMode = .system
     let container: ModelContainer
     @StateObject private var themeManager = ThemeManager()

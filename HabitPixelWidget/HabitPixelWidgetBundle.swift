@@ -1,11 +1,11 @@
-// HabitPixelWidgetBundle.swift
+// HabitRixWidgetBundle.swift
 
 import WidgetKit
 import SwiftUI
 
 @main
-struct HabitPixelWidgetBundle: WidgetBundle {
+struct HabitRixWidgetBundle: WidgetBundle {
     var body: some Widget {
-        HabitPixelWidget()
+        HabitRixWidget()
     }
 }

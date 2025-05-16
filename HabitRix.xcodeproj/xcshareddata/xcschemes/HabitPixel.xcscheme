@@ -16,9 +16,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "2D24EF5C2D8E134600B3991F"
-               BuildableName = "HabitPixel.app"
-               BlueprintName = "HabitPixel"
-               ReferencedContainer = "container:HabitPixel.xcodeproj">
+               BuildableName = "HabitRix.app"
+               BlueprintName = "HabitRix"
+               ReferencedContainer = "container:HabitRix.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -45,9 +45,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "2D24EF5C2D8E134600B3991F"
-            BuildableName = "HabitPixel.app"
-            BlueprintName = "HabitPixel"
-            ReferencedContainer = "container:HabitPixel.xcodeproj">
+            BuildableName = "HabitRix.app"
+            BlueprintName = "HabitRix"
+            ReferencedContainer = "container:HabitRix.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -62,9 +62,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "2D24EF5C2D8E134600B3991F"
-            BuildableName = "HabitPixel.app"
-            BlueprintName = "HabitPixel"
-            ReferencedContainer = "container:HabitPixel.xcodeproj">
+            BuildableName = "HabitRix.app"
+            BlueprintName = "HabitRix"
+            ReferencedContainer = "container:HabitRix.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

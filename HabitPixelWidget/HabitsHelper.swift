@@ -1,6 +1,6 @@
 //
 //  HabitsHelper.swift
-//  HabitPixel
+//  HabitRix
 //
 //  Created by Mohamed Elatabany on 13/05/2025.
 //
@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 
 struct HabitsHelper {
-    static let defaults = UserDefaults(suiteName: "group.com.atabany.HabitPixel")
+    static let defaults = UserDefaults(suiteName: "group.com.atabany.HabitRix")
 
     static func loadAllHabits() -> [HabitDisplayInfo]? {
         guard let data = defaults?.data(forKey: "WidgetHabits") else {

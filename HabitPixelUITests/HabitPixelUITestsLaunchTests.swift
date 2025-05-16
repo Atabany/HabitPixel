@@ -1,13 +1,13 @@
 //
-//  HabitPixelUITestsLaunchTests.swift
-//  HabitPixelUITests
+//  HabitRixUITestsLaunchTests.swift
+//  HabitRixUITests
 //
 //  Created by Mohamed Elatabany on 22/03/2025.
 //
 
 import XCTest
 
-final class HabitPixelUITestsLaunchTests: XCTestCase {
+final class HabitRixUITestsLaunchTests: XCTestCase {
 
     override class var runsForEachTargetApplicationUIConfiguration: Bool {
         true

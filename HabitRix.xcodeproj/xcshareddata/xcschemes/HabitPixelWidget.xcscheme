@@ -17,9 +17,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "2D99F0EE2D987A56009C7A8F"
-               BuildableName = "HabitPixelWidget.appex"
-               BlueprintName = "HabitPixelWidget"
-               ReferencedContainer = "container:HabitPixel.xcodeproj">
+               BuildableName = "HabitRixWidget.appex"
+               BlueprintName = "HabitRixWidget"
+               ReferencedContainer = "container:HabitRix.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -31,9 +31,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "2D24EF5C2D8E134600B3991F"
-               BuildableName = "HabitPixel.app"
-               BlueprintName = "HabitPixel"
-               ReferencedContainer = "container:HabitPixel.xcodeproj">
+               BuildableName = "HabitRix.app"
+               BlueprintName = "HabitRix"
+               ReferencedContainer = "container:HabitRix.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -63,18 +63,18 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "2D99F0EE2D987A56009C7A8F"
-            BuildableName = "HabitPixelWidget.appex"
-            BlueprintName = "HabitPixelWidget"
-            ReferencedContainer = "container:HabitPixel.xcodeproj">
+            BuildableName = "HabitRixWidget.appex"
+            BlueprintName = "HabitRixWidget"
+            ReferencedContainer = "container:HabitRix.xcodeproj">
          </BuildableReference>
       </RemoteRunnable>
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "2D24EF5C2D8E134600B3991F"
-            BuildableName = "HabitPixel.app"
-            BlueprintName = "HabitPixel"
-            ReferencedContainer = "container:HabitPixel.xcodeproj">
+            BuildableName = "HabitRix.app"
+            BlueprintName = "HabitRix"
+            ReferencedContainer = "container:HabitRix.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <EnvironmentVariables>
@@ -108,9 +108,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "2D24EF5C2D8E134600B3991F"
-            BuildableName = "HabitPixel.app"
-            BlueprintName = "HabitPixel"
-            ReferencedContainer = "container:HabitPixel.xcodeproj">
+            BuildableName = "HabitRix.app"
+            BlueprintName = "HabitRix"
+            ReferencedContainer = "container:HabitRix.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

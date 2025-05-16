@@ -1,14 +1,14 @@
 //
-//  HabitPixelTests.swift
-//  HabitPixelTests
+//  HabitRixTests.swift
+//  HabitRixTests
 //
 //  Created by Mohamed Elatabany on 22/03/2025.
 //
 
 import XCTest
-@testable import HabitPixel
+@testable import HabitRix
 
-final class HabitPixelTests: XCTestCase {
+final class HabitRixTests: XCTestCase {
 
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.

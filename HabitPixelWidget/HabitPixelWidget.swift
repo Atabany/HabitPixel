@@ -1,6 +1,6 @@
 //
-//  HabitPixelWidget.swift
-//  HabitPixelWidget
+//  HabitRixWidget.swift
+//  HabitRixWidget
 //
 //  Created by Mohamed Elatabany on 29/03/2025.
 //
@@ -66,7 +66,7 @@ struct Provider: AppIntentTimelineProvider {
     }
 }
 
-struct HabitPixelWidgetEntryView: View {
+struct HabitRixWidgetEntryView: View {
     var entry: Provider.Entry
     @Environment(\.widgetFamily) var widgetFamily
     @Environment(\.colorScheme) var colorScheme
@@ -105,8 +105,8 @@ struct HabitPixelWidgetEntryView: View {
     }
 }
 
-struct HabitPixelWidget: Widget {
-    let kind: String = "HabitPixelWidget"
+struct HabitRixWidget: Widget {
+    let kind: String = "HabitRixWidget"
 
     var body: some WidgetConfiguration {
         AppIntentConfiguration(
@@ -114,7 +114,7 @@ struct HabitPixelWidget: Widget {
             intent: SelectHabitIntent.self,
             provider: Provider()
         ) { entry in
-            HabitPixelWidgetEntryViewWrapper(entry: entry)
+            HabitRixWidgetEntryViewWrapper(entry: entry)
         }
         .configurationDisplayName("Habit Tracker")
         .description("Track progress for a selected habit.")
@@ -122,7 +122,7 @@ struct HabitPixelWidget: Widget {
     }
 }
 
-struct HabitPixelWidgetEntryViewWrapper: View {
+struct HabitRixWidgetEntryViewWrapper: View {
     var entry: Provider.Entry
     @Environment(\.colorScheme) var colorScheme
 
@@ -131,7 +131,7 @@ struct HabitPixelWidgetEntryViewWrapper: View {
     }
 
     var body: some View {
-        HabitPixelWidgetEntryView(entry: entry)
+        HabitRixWidgetEntryView(entry: entry)
             .containerBackground(colors.background, for: .widget)
     }
 }
